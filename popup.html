@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    :root {
+      --bg: radial-gradient(120% 140% at 10% 0%, #f1f5ff 0%, #eefaf7 42%, #fdf7ec 100%);
+      --card: rgba(255, 255, 255, 0.82);
+      --text: #132033;
+      --muted: #5f6b7a;
+      --line: #dfe7f3;
+      --accent-a: #4f7cff;
+      --accent-b: #17b890;
+      --accent-c: #ff9f43;
+      --input-bg: #ffffff;
+      --shadow: 0 12px 28px rgba(18, 28, 45, 0.14);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: radial-gradient(130% 150% at 0% 0%, #19243b 0%, #132d2a 46%, #34251a 100%);
+        --card: rgba(18, 24, 35, 0.84);
+        --text: #ecf2ff;
+        --muted: #aebad2;
+        --line: #2c3a52;
+        --accent-a: #7aa2ff;
+        --accent-b: #3bd3ab;
+        --accent-c: #ffb86b;
+        --input-bg: #121a28;
+        --shadow: 0 12px 30px rgba(0, 0, 0, 0.42);
+      }
+    }
+
+    body {
+      margin: 0;
+      width: 330px;
+      padding: 10px;
+      color: var(--text);
+      font-family: "Segoe UI Variable", "Poppins", "Trebuchet MS", "Noto Sans", sans-serif;
+      background: var(--bg);
+    }
+    .shell {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--card);
+      backdrop-filter: blur(6px);
+      box-shadow: var(--shadow);
+      padding: 10px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 4px 2px 8px;
+      border-bottom: 1px solid var(--line);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand img {
+      width: 24px;
+      height: 24px;
+      border-radius: 7px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    h2 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: 0.2px;
+    }
+    .chip {
+      font-size: 11px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      color: #fff;
+      background: linear-gradient(125deg, var(--accent-a), var(--accent-b));
+    }
+    .setting-group {
+      margin-bottom: 8px;
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.28);
+    }
+    @media (prefers-color-scheme: dark) {
+      .setting-group {
+        background: rgba(255, 255, 255, 0.02);
+      }
+    }
+    .count-group {
+      margin: 4px 0;
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .count-group strong {
+      color: var(--text);
+      font-size: 13px;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 4px;
+      font-size: 12px;
+    }
+    input[type="number"] {
+      width: 56px;
+      padding: 4px 6px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--text);
+      background: var(--input-bg);
+    }
+    #wordCountRange {
+        margin-left: 8px;
+        font-size: 11px;
+        color: var(--muted);
+    }
+    textarea {
+      width: calc(100% - 12px);
+      height: 42px;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      resize: vertical;
+      font-family: monospace;
+      font-size: 11px;
+      color: var(--text);
+      background: var(--input-bg);
+    }
+    select {
+      width: 100%;
+      padding: 5px 6px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      font-size: 11px;
+      color: var(--text);
+      background: var(--input-bg);
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 22px;
+    }
+    .switch input {opacity: 0; width: 0; height: 0;}
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #8ea1ba;
+      transition: .4s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background: linear-gradient(125deg, var(--accent-a), var(--accent-b));
+    }
+    input:checked + .slider:before {
+      transform: translateX(16px);
+    }
+    .flex-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 4px;
+        gap: 8px;
+    }
+    .flex-row > label {
+        margin: 0;
+        font-weight: normal;
+        font-size: 12px;
+    }
+    .counts-wrap {
+      margin-top: 6px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px;
+      background: linear-gradient(130deg, rgba(79, 124, 255, 0.08), rgba(23, 184, 144, 0.08));
+    }
+    .counts-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .counts-title {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .view-switch {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .view-btn {
+      width: 26px;
+      height: 22px;
+      border: 0;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      font-size: 12px;
+      display: grid;
+      place-items: center;
+    }
+    .view-btn.active {
+      color: #fff;
+      background: linear-gradient(125deg, var(--accent-a), var(--accent-b));
+    }
+    .summary-list[data-view="chart"],
+    .summary-chart[data-view="list"] {
+      display: none;
+    }
+    .summary-list .count-group:nth-child(1) { color: #5bc0ff; }
+    .summary-list .count-group:nth-child(2) { color: #bd77ff; }
+    .summary-list .count-group:nth-child(3) { color: #44d17f; }
+    .summary-list .count-group strong {
+      color: inherit;
+    }
+    .summary-chart-grid {
+      display: grid;
+      grid-template-columns: 88px 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+    .summary-donut {
+      width: 82px;
+      height: 82px;
+      border-radius: 50%;
+      background: conic-gradient(#5bc0ff 0deg, #5bc0ff 360deg);
+      position: relative;
+      margin: 0 auto;
+    }
+    .summary-donut::before {
+      content: "";
+      position: absolute;
+      inset: 10px;
+      border-radius: 50%;
+      background: var(--card);
+      border: 1px solid var(--line);
+    }
+    .summary-donut-value {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      font-weight: 700;
+      color: #5bc0ff;
+      z-index: 1;
+    }
+    .dot-total { background: #5bc0ff; }
+    .dot-hidden { background: #bd77ff; }
+    .dot-visible { background: #44d17f; }
+    .legend-total { color: #5bc0ff; }
+    .legend-hidden { color: #bd77ff; }
+    .legend-visible { color: #44d17f; }
+    .legend-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin: 4px 0;
+    }
+    .legend-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+    .legend-val {
+      color: var(--text);
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .donate-wrap {
+      margin-top: 8px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: linear-gradient(130deg, rgba(79, 124, 255, 0.06), rgba(23, 184, 144, 0.06));
+    }
+    .donate-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .donate-text {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .donate-upi {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-a);
+      font-family: monospace;
+      letter-spacing: 0.3px;
+      background: rgba(79, 124, 255, 0.1);
+      padding: 2px 8px;
+      border-radius: 6px;
+      user-select: all;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+  <div class="header">
+    <div class="brand">
+      <img src="icon-48.png" alt="Comment Vaccinator logo">
+      <h2>Comment Vaccinator</h2>
+    </div>
+    <span class="chip">-inator</span>
+  </div>
+
+  <div class="setting-group">
+    <div class="flex-row">
+        <label for="dateFilterEnabled">Enable Date Filter:</label>
+        <label class="switch">
+            <input type="checkbox" id="dateFilterEnabled">
+            <span class="slider"></span>
+        </label>
+    </div>
+  </div>
+
+  <div class="setting-group">
+    <div class="flex-row">
+        <label for="wordCountEnabled">Enable Word Count Filter:</label>
+        <label class="switch">
+            <input type="checkbox" id="wordCountEnabled">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <div id="wordCountControls">
+        <label for="wordCountMode">Filter Mode:</label>
+        <select id="wordCountMode">
+            <option value="max">Hide if LESS THAN (Max Word Count)</option>
+            <option value="min">Hide if MORE THAN (Min Word Count)</option>
+        </select>
+        <div style="margin-top: 10px;">
+            <label for="wordCountValue">Word Count Value:</label>
+            <input type="number" id="wordCountValue" min="3" max="50">
+            <span id="wordCountRange">(3-50)</span>
+        </div>
+    </div>
+  </div>
+
+  <div class="setting-group">
+    <div class="flex-row">
+        <label for="emojiFilterEnabled">Enable Strict Emoji Filter:</label>
+        <label class="switch">
+            <input type="checkbox" id="emojiFilterEnabled">
+            <span class="slider"></span>
+        </label>
+    </div>
+  </div>
+
+  <div class="setting-group">
+    <div class="flex-row">
+        <label for="keywordEnabled">Enable Keyword Blacklist:</label>
+        <label class="switch">
+            <input type="checkbox" id="keywordEnabled">
+            <span class="slider"></span>
+        </label>
+    </div>
+    <label for="keywordList">Blacklist Keywords (comma-separated):</label>
+    <textarea id="keywordList" placeholder="e.g., ad, sponsor, first, subscribe"></textarea>
+  </div>
+
+  <div class="counts-wrap">
+    <div class="counts-head">
+      <p class="counts-title">Comment Stats</p>
+      <div class="view-switch" role="tablist" aria-label="Stats view switch">
+        <button class="view-btn active" id="statsListBtn" title="Text mode">&#9776;</button>
+        <button class="view-btn" id="statsChartBtn" title="Chart mode">&#9681;</button>
+      </div>
+    </div>
+
+    <div class="summary-list" id="summaryList" data-view="list">
+      <div class="count-group">Total Comments <strong id="total">0</strong></div>
+      <div class="count-group">Hidden Comments <strong id="hidden">0</strong></div>
+      <div class="count-group">Visible Comments <strong id="visible">0</strong></div>
+    </div>
+
+    <div class="summary-chart" id="summaryChart" data-view="list">
+      <div class="summary-chart-grid">
+        <div class="summary-donut" id="summaryDonut">
+          <div class="summary-donut-value" id="summaryDonutValue">0</div>
+        </div>
+        <div>
+          <div class="legend-row">
+            <div class="legend-left"><span class="dot dot-total"></span><span class="legend-total">Total</span></div>
+            <span class="legend-val legend-total" id="totalChart">0</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-left"><span class="dot dot-hidden"></span><span class="legend-hidden">Hidden</span></div>
+            <span class="legend-val legend-hidden" id="hiddenChart">0</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-left"><span class="dot dot-visible"></span><span class="legend-visible">Visible</span></div>
+            <span class="legend-val legend-visible" id="visibleChart">0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="donate-wrap">
+    <div class="donate-row">
+      <span class="donate-text">☕ Support this -inator</span>
+      <span class="donate-upi">surajbunde@ybl</span>
+    </div>
+  </div>
+
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

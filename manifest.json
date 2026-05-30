@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Comment Vaccinator",
+  "version": "1.0.0",
+  "description": "Behold! The Comment-Vaccinator-inator! Vanquishes date-obsessed & keyword-ridden YouTube comments. Mwahaha!",
+  "permissions": ["storage", "tabs"],
+  "host_permissions": ["https://www.youtube.com/*"],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "comment-vaccinator@surajbunde"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["filterComments.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "32": "icon-32.png",
+      "48": "icon-48.png",
+      "128": "icon-128.png"
+    }
+  },
+  "icons": {
+    "32": "icon-32.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  }
+}
