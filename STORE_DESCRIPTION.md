@@ -6,7 +6,7 @@ Use the text below for your Chrome Web Store and Firefox Add-ons listings.
 
 ## Short Description (132 chars)
 
-> Behold! The Comment-Vaccinator-inator! Vanquishes date-obsessed & keyword-ridden YouTube comments. Mwahaha!
+> Behold! The Comment Vaccinator! Vanquishes date-obsessed & keyword-ridden YouTube comments. Mwahaha!
 
 ---
 

@@ -1,15 +1,6 @@
-# YT Dates Deleter
+# Comment Vaccinator
 
 Hide repetitive YouTube comments that contain date-like phrases, while preserving normal discussion using word-count and keyword controls.
-
-## Suggested Product Name
-
-Recommended: **YouTube Comment Date Filter**
-
-Other good options:
-- **DateSweep for YouTube Comments**
-- **YouTube Noise Date Cleaner**
-- **CommentShield for YouTube**
 
 ## Features
 
@@ -49,7 +40,7 @@ Prerequisite: Node.js installed.
 node test-date-filter.js
 ```
 
-Expected: `Summary: 12/12 checks passed`
+Expected: `Summary: 31/31 checks passed`
 
 If failures appear, tune date regex in `filterComments.js`, then rerun.
 
@@ -58,7 +49,7 @@ If failures appear, tune date regex in `filterComments.js`, then rerun.
 1. Open `chrome://extensions`
 2. Enable **Developer mode**
 3. Click **Load unpacked**
-4. Select this folder: `E:\Projects\yt-dates-deleter`
+4. Select the project folder
 5. Open any YouTube video with comments
 6. Open extension popup and test settings
 
@@ -67,34 +58,16 @@ If failures appear, tune date regex in `filterComments.js`, then rerun.
 1. Open `edge://extensions`
 2. Enable **Developer mode**
 3. Click **Load unpacked**
-4. Select `E:\Projects\yt-dates-deleter`
+4. Select the project folder
 5. Test on YouTube as above
 
 ### 4. Temporary Add-on in Firefox
 
-1. Zip the extension files (or use folder load if available in your build)
+1. Zip the extension files
 2. Open `about:debugging#/runtime/this-firefox`
 3. Click **Load Temporary Add-on**
-4. Select `manifest.json` (or built package)
+4. Select `manifest.json`
 5. Open YouTube and validate behavior
-
-Notes:
-- `browser_specific_settings.gecko.id` is already set in `manifest.json` for AMO compatibility.
-
-### 5. Safari Testing (macOS only)
-
-Safari Web Extensions require Xcode packaging.
-
-1. On macOS, copy project folder locally.
-2. Run:
-
-```bash
-xcrun safari-web-extension-converter /path/to/yt-dates-deleter
-```
-
-3. Open generated Xcode project.
-4. Build and run the Safari extension target.
-5. Enable extension in Safari settings and test on YouTube.
 
 ## Manual Test Checklist
 
@@ -123,7 +96,6 @@ Use at least 3-5 videos with active comments and validate:
 - Chrome Web Store: package and submit zip; review required.
 - Edge Add-ons: mostly same package as Chrome.
 - Firefox AMO: submit signed build; gecko ID required for stable updates.
-- Safari: distribute through Apple workflow (Xcode and Apple Developer account).
 
 ## Known Limitations
 
@@ -138,3 +110,7 @@ Common tweaks:
 - Edit `DATE_PATTERNS` in `filterComments.js` to tune sensitivity.
 - Adjust default threshold in `settings.wordCountValue`.
 - Expand keyword behavior (exact-match vs contains).
+
+## License
+
+CC BY-NC-SA 4.0 — Free to use, modify, and share for non-commercial purposes.
