@@ -4,7 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const wordCountMode = document.getElementById('wordCountMode');
     const wordCountValue = document.getElementById('wordCountValue');
     const wordCountControls = document.getElementById('wordCountControls');
-    const emojiFilterEnabled = document.getElementById('emojiFilterEnabled'); // NEW ELEMENT
+    const emojiFilterEnabled = document.getElementById('emojiFilterEnabled');
+    const emojiOnlyEnabled = document.getElementById('emojiOnlyEnabled');
     const keywordEnabled = document.getElementById('keywordEnabled');
     const keywordList = document.getElementById('keywordList');
     const statsListBtn = document.getElementById('statsListBtn');
@@ -21,7 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.local.get([
         'dateFilterEnabled',
         'wordCountEnabled', 'wordCountMode', 'wordCountValue',
-        'keywordEnabled', 'keywordList', 'emojiFilterEnabled' // NEW SETTING
+        'keywordEnabled', 'keywordList', 'emojiFilterEnabled',
+        'emojiOnlyEnabled'
     ], (data) => {
         // Date filter setting
         dateFilterEnabled.checked = data.dateFilterEnabled !== undefined ? data.dateFilterEnabled : true;
@@ -31,8 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
         wordCountMode.value = data.wordCountMode || 'max';
         wordCountValue.value = data.wordCountValue || 12; 
         
-        // Emoji Setting
+        // Emoji Setting (under word count)
         emojiFilterEnabled.checked = data.emojiFilterEnabled !== undefined ? data.emojiFilterEnabled : false;
+        
+        // Emoji Only setting
+        emojiOnlyEnabled.checked = data.emojiOnlyEnabled !== undefined ? data.emojiOnlyEnabled : false;
         
         // Keyword Settings
         keywordEnabled.checked = data.keywordEnabled !== undefined ? data.keywordEnabled : false;
@@ -40,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Initial UI state
         wordCountControls.style.display = wordCountEnabled.checked ? 'block' : 'none';
+        emojiFilterEnabled.disabled = !wordCountEnabled.checked;
         keywordList.disabled = !keywordEnabled.checked;
         
         wordCountValue.min = 3;
@@ -58,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 2. Update UI state
         wordCountControls.style.display = isWcEnabled ? 'block' : 'none';
+        emojiFilterEnabled.disabled = !isWcEnabled;
         keywordList.disabled = !keywordEnabled.checked;
 
         // 3. Save to storage
@@ -66,12 +73,13 @@ document.addEventListener('DOMContentLoaded', () => {
             wordCountEnabled: isWcEnabled,
             wordCountMode: wordCountMode.value,
             wordCountValue: wcCount,
-            emojiFilterEnabled: emojiFilterEnabled.checked, // NEW SAVE
+            emojiFilterEnabled: emojiFilterEnabled.checked,
+            emojiOnlyEnabled: emojiOnlyEnabled.checked,
             keywordEnabled: keywordEnabled.checked,
             keywordList: keywordList.value.trim()
         }, () => {
              // 4. CRITICAL: Auto-Reload on Save
-             chrome.tabs.query({ url: "*://www.youtube.com/*" }, (tabs) => {
+             chrome.tabs.query({ url: "*://*.youtube.com/*" }, (tabs) => {
                 tabs.forEach(tab => {
                     chrome.tabs.sendMessage(tab.id, { type: 'REFILTER_NOW' }, (response) => {
                         if (chrome.runtime.lastError) {} 
@@ -89,7 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
     keywordEnabled.addEventListener('change', saveSettings);
     keywordList.addEventListener('change', saveSettings);
     keywordList.addEventListener('blur', saveSettings); 
-    emojiFilterEnabled.addEventListener('change', saveSettings); // NEW LISTENER
+    emojiFilterEnabled.addEventListener('change', saveSettings);
+    emojiOnlyEnabled.addEventListener('change', saveSettings);
 
     // --- C. Get counts from Content Script ---
     function getCounts() {

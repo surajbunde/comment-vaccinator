@@ -31,14 +31,22 @@
       }
     }
 
-    body {
+    html {
+      height: 100%;
       margin: 0;
-      width: 330px;
-      padding: 10px;
+    }
+    body {
+      min-height: 100%;
+      width: 100%;
+      min-width: 320px;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
       color: var(--text);
       font-family: "Segoe UI Variable", "Poppins", "Trebuchet MS", "Noto Sans", sans-serif;
       background: var(--bg);
     }
+
     .shell {
       border: 1px solid var(--line);
       border-radius: 16px;
@@ -47,6 +55,19 @@
       box-shadow: var(--shadow);
       padding: 10px;
     }
+
+    @media (max-width: 480px) {
+      html, body { height: 100%; }
+      body { display: flex; flex-direction: column; }
+      .shell {
+        flex: 1;
+        border-radius: 0;
+        border: none;
+        box-shadow: none;
+        padding: 12px;
+      }
+    }
+
     .header {
       display: flex;
       align-items: center;
@@ -90,6 +111,14 @@
         background: rgba(255, 255, 255, 0.02);
       }
     }
+    .setting-group label { cursor: pointer; }
+
+    @media (min-height: 601px) {
+      .setting-group {
+        padding: 12px;
+      }
+    }
+
     .count-group {
       margin: 4px 0;
       font-size: 12px;
@@ -108,6 +137,11 @@
       margin-bottom: 4px;
       font-size: 12px;
     }
+
+    @media (min-height: 601px) {
+      label { font-size: 13px; }
+    }
+
     input[type="number"] {
       width: 56px;
       padding: 4px 6px;
@@ -117,6 +151,15 @@
       color: var(--text);
       background: var(--input-bg);
     }
+
+    @media (min-height: 601px) {
+      input[type="number"] {
+        padding: 8px;
+        font-size: 13px;
+        width: 64px;
+      }
+    }
+
     #wordCountRange {
         margin-left: 8px;
         font-size: 11px;
@@ -134,6 +177,15 @@
       color: var(--text);
       background: var(--input-bg);
     }
+
+    @media (min-height: 601px) {
+      textarea {
+        height: 56px;
+        padding: 8px;
+        font-size: 13px;
+      }
+    }
+
     select {
       width: 100%;
       padding: 5px 6px;
@@ -143,6 +195,14 @@
       color: var(--text);
       background: var(--input-bg);
     }
+
+    @media (min-height: 601px) {
+      select {
+        padding: 8px;
+        font-size: 13px;
+      }
+    }
+
     .switch {
       position: relative;
       display: inline-block;
@@ -178,6 +238,23 @@
     input:checked + .slider:before {
       transform: translateX(16px);
     }
+
+    @media (min-height: 601px) {
+      .switch {
+        width: 48px;
+        height: 28px;
+      }
+      .slider:before {
+        height: 18px;
+        width: 18px;
+        left: 5px;
+        bottom: 5px;
+      }
+      input:checked + .slider:before {
+        transform: translateX(20px);
+      }
+    }
+
     .flex-row {
         display: flex;
         align-items: center;
@@ -190,6 +267,11 @@
         font-weight: normal;
         font-size: 12px;
     }
+
+    @media (min-height: 601px) {
+      .flex-row > label { font-size: 14px; }
+    }
+
     .counts-wrap {
       margin-top: 6px;
       border: 1px solid var(--line);
@@ -197,6 +279,9 @@
       padding: 8px;
       background: linear-gradient(130deg, rgba(79, 124, 255, 0.08), rgba(23, 184, 144, 0.08));
     }
+
+
+
     .counts-head {
       display: flex;
       align-items: center;
@@ -231,6 +316,15 @@
       color: #fff;
       background: linear-gradient(125deg, var(--accent-a), var(--accent-b));
     }
+
+    @media (min-height: 601px) {
+      .view-btn {
+        width: 32px;
+        height: 28px;
+        font-size: 14px;
+      }
+    }
+
     .summary-list[data-view="chart"],
     .summary-chart[data-view="list"] {
       display: none;
@@ -366,14 +460,21 @@
             <input type="number" id="wordCountValue" min="3" max="50">
             <span id="wordCountRange">(3-50)</span>
         </div>
+        <div class="flex-row" style="margin-top: 10px;">
+            <label for="emojiFilterEnabled" title="Removes emoji characters before word counting, so emoji-heavy comments get accurate word counts.">Strip Emojis Before Counting:</label>
+            <label class="switch">
+                <input type="checkbox" id="emojiFilterEnabled">
+                <span class="slider"></span>
+            </label>
+        </div>
     </div>
   </div>
 
   <div class="setting-group">
     <div class="flex-row">
-        <label for="emojiFilterEnabled">Enable Strict Emoji Filter:</label>
+        <label for="emojiOnlyEnabled" title="Hides comments that contain only emoji characters with no meaningful text.">Hide Emoji-Only Comments:</label>
         <label class="switch">
-            <input type="checkbox" id="emojiFilterEnabled">
+            <input type="checkbox" id="emojiOnlyEnabled">
             <span class="slider"></span>
         </label>
     </div>
