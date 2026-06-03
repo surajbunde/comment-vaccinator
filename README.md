@@ -4,17 +4,18 @@ Hide repetitive YouTube comments that contain date-like phrases, while preservin
 
 ## Download
 
-[![Chrome Web Store](https://img.shields.io/badge/Chrome-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/comment-vaccinator/ogadpocgkohdanekbkdjnmnjbdgohijf)
-[![Firefox Add-ons](https://img.shields.io/badge/Firefox-FF7139?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://addons.mozilla.org/en-US/firefox/addon/comment-vaccinator/)
-[![Brave](https://img.shields.io/badge/Brave-FB542B?style=for-the-badge&logo=brave&logoColor=white)](https://chromewebstore.google.com/detail/comment-vaccinator/ogadpocgkohdanekbkdjnmnjbdgohijf)
-[![Edge](https://img.shields.io/badge/Edge-0078D7?style=for-the-badge&logo=microsoftedge&logoColor=white)](https://chromewebstore.google.com/detail/comment-vaccinator/ogadpocgkohdanekbkdjnmnjbdgohijf)
-[![Opera](https://img.shields.io/badge/Opera-FF1B2D?style=for-the-badge&logo=opera&logoColor=white)](https://chromewebstore.google.com/detail/comment-vaccinator/ogadpocgkohdanekbkdjnmnjbdgohijf)
-
-> **Note:** Brave, Edge, and Opera support Chrome extensions directly — install from the Chrome Web Store link above.
+<div align="center">
+  <a href="https://chromewebstore.google.com/detail/comment-vaccinator/ogadpocgkohdanekbkdjnmnjbdgohijf"><img src="https://img.shields.io/badge/Available%20on%20Chrome%20Web%20Store-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white&logoWidth=28" alt="Chrome Web Store"></a>
+  <a href="https://addons.mozilla.org/en-US/firefox/addon/comment-vaccinator/"><img src="https://img.shields.io/badge/Get%20for%20Firefox-FF7139?style=for-the-badge&logo=firefoxbrowser&logoColor=white&logoWidth=28" alt="Firefox Add-ons"></a>
+  <br><br>
+  <a href="https://chromewebstore.google.com/detail/comment-vaccinator/ogadpocgkohdanekbkdjnmnjbdgohijf"><img src="https://img.shields.io/badge/Works%20on%20Brave-FB542B?style=for-the-badge&logo=brave&logoColor=white&logoWidth=28" alt="Brave"></a>
+  <a href="https://chromewebstore.google.com/detail/comment-vaccinator/ogadpocgkohdanekbkdjnmnjbdgohijf"><img src="https://img.shields.io/badge/Works%20on%20Edge-0078D7?style=for-the-badge&logo=microsoftedge&logoColor=white&logoWidth=28" alt="Edge"></a>
+  <a href="https://chromewebstore.google.com/detail/comment-vaccinator/ogadpocgkohdanekbkdjnmnjbdgohijf"><img src="https://img.shields.io/badge/Works%20on%20Opera-FF1B2D?style=for-the-badge&logo=opera&logoColor=white&logoWidth=28" alt="Opera"></a>
+</div>
 
 ## Features
 
-- Date-pattern filtering for common "watching in 20xx" style comments.
+- Date-pattern filtering for English and Hindi (Devanagari) date formats.
 - Date filter master toggle (enable/disable date pipeline anytime).
 - Optional word-count filter:
   - `max`: hide if comment has fewer words than threshold.
@@ -110,7 +111,7 @@ Use at least 3-5 videos with active comments and validate:
 ## Known Limitations
 
 - YouTube DOM can change; selectors may need updates.
-- Date detection is heuristic and language/locale biased (currently English-focused).
+- Date detection is heuristic and language/locale biased (English + Hindi/Devanagari supported).
 - Some short non-date comments may still be filtered depending on threshold settings.
 
 ## Contributing / Customization
