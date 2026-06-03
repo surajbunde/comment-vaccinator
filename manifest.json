@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Comment Vaccinator – YouTube Comment Filter",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Clean up YouTube comments by filtering repetitive date comments, keyword spam, low-effort posts & more.",
   "permissions": ["storage", "tabs"],
   "host_permissions": ["https://www.youtube.com/*"],
