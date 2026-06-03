@@ -1,13 +1,16 @@
 {
   "manifest_version": 3,
-  "name": "Comment Vaccinator",
-  "version": "1.0.0",
-  "description": "Behold! The Comment Vaccinator! Vanquishes date-obsessed & keyword-ridden YouTube comments. Mwahaha!",
+  "name": "Comment Vaccinator – YouTube Comment Filter",
+  "version": "1.1.0",
+  "description": "Clean up YouTube comments by filtering repetitive date comments, keyword spam, low-effort posts & more.",
   "permissions": ["storage", "tabs"],
   "host_permissions": ["https://www.youtube.com/*"],
   "browser_specific_settings": {
     "gecko": {
-      "id": "comment-vaccinator@surajbunde"
+      "id": "comment-vaccinator@surajbunde",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
     }
   },
   "content_scripts": [

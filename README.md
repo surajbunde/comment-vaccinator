@@ -1,6 +1,16 @@
-# Comment Vaccinator
+# Comment Vaccinator – YouTube Comment Filter
 
 Hide repetitive YouTube comments that contain date-like phrases, while preserving normal discussion using word-count and keyword controls.
+
+## Download
+
+[![Chrome Web Store](https://img.shields.io/badge/Chrome-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/comment-vaccinator/ogadpocgkohdanekbkdjnmnjbdgohijf)
+[![Firefox Add-ons](https://img.shields.io/badge/Firefox-FF7139?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://addons.mozilla.org/en-US/firefox/addon/comment-vaccinator/)
+[![Brave](https://img.shields.io/badge/Brave-FB542B?style=for-the-badge&logo=brave&logoColor=white)](https://chromewebstore.google.com/detail/comment-vaccinator/ogadpocgkohdanekbkdjnmnjbdgohijf)
+[![Edge](https://img.shields.io/badge/Edge-0078D7?style=for-the-badge&logo=microsoftedge&logoColor=white)](https://chromewebstore.google.com/detail/comment-vaccinator/ogadpocgkohdanekbkdjnmnjbdgohijf)
+[![Opera](https://img.shields.io/badge/Opera-FF1B2D?style=for-the-badge&logo=opera&logoColor=white)](https://chromewebstore.google.com/detail/comment-vaccinator/ogadpocgkohdanekbkdjnmnjbdgohijf)
+
+> **Note:** Brave, Edge, and Opera support Chrome extensions directly — install from the Chrome Web Store link above.
 
 ## Features
 

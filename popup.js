@@ -27,12 +27,12 @@ document.addEventListener('DOMContentLoaded', () => {
         dateFilterEnabled.checked = data.dateFilterEnabled !== undefined ? data.dateFilterEnabled : true;
 
         // Word Count Settings
-        wordCountEnabled.checked = data.wordCountEnabled !== undefined ? data.wordCountEnabled : true;
+        wordCountEnabled.checked = data.wordCountEnabled !== undefined ? data.wordCountEnabled : false;
         wordCountMode.value = data.wordCountMode || 'max';
         wordCountValue.value = data.wordCountValue || 12; 
         
         // Emoji Setting
-        emojiFilterEnabled.checked = data.emojiFilterEnabled !== undefined ? data.emojiFilterEnabled : true; // Default to ON for aggressive date filtering
+        emojiFilterEnabled.checked = data.emojiFilterEnabled !== undefined ? data.emojiFilterEnabled : false;
         
         // Keyword Settings
         keywordEnabled.checked = data.keywordEnabled !== undefined ? data.keywordEnabled : false;

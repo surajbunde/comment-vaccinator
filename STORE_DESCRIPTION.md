@@ -1,4 +1,4 @@
-# Comment Vaccinator — Store Listing Content
+# Comment Vaccinator – YouTube Comment Filter — Store Listing Content
 
 Use the text below for your Chrome Web Store and Firefox Add-ons listings.
 
@@ -6,17 +6,15 @@ Use the text below for your Chrome Web Store and Firefox Add-ons listings.
 
 ## Short Description (132 chars)
 
-> Behold! The Comment Vaccinator! Vanquishes date-obsessed & keyword-ridden YouTube comments. Mwahaha!
+> Clean up YouTube comments by filtering repetitive date comments, keyword spam, low-effort posts & more.
 
 ---
 
 ## Detailed Description (Full Store Listing)
 
-**Behold! The Comment-Vaccinator-inator!**
+Clean up YouTube comments by automatically filtering repetitive date comments, keyword spam, low-effort posts, and unwanted phrases. Comment Vaccinator helps you focus on meaningful discussions by removing comments such as "Anyone here in 2026?", "First!", "Subscribe", repetitive keywords, and other low-value clutter in real time. Customize filtering with date detection, word-count rules, keyword blacklists, emoji-aware counting, and live comment statistics.
 
-Ever scroll through YouTube comments and see "Anyone in 2025?" a GAZILLION times? Tired of "first", "subscribe", and "sponsor" cluttering every video? My latest -inator is here to VANQUISH those date-obsessed, keyword-ridden comments once and for all!
-
-Created by your friendly neighbourhood mad scientist (definitely not Dr. Doofenshmirtz... mostly), this extension surgically removes date-like comments, word-count spam, and keyword clutter from YouTube — automatically, in real time.
+Detects and filters date-based comments in both English and Hindi (Devanagari) formats.
 
 ---
 
