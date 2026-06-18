@@ -7,7 +7,11 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "comment-vaccinator@surajbunde",
-      "strict_min_version": "120.0"
+      "strict_min_version": "120.0",
+      "data_collection_permissions": {
+        "isExempt": true,
+        "description": "This extension does not collect any user data."
+      }
     }
   },
   "background": {

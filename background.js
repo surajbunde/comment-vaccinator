@@ -30,20 +30,24 @@ chrome.runtime.onInstalled.addListener((details) => {
   });
 
   // Set initial badge style
-  if (chrome.action) {
-    chrome.action.setBadgeBackgroundColor({ color: "#E8503A" });
-    chrome.action.setBadgeText({ text: "" });
+  const api = chrome.action || chrome.browserAction;
+  if (api) {
+    api.setBadgeBackgroundColor({ color: "#E8503A" });
+    api.setBadgeText({ text: "" });
   }
 });
 
 // Listen for badge update requests from the content script.
 chrome.runtime.onMessage.addListener((msg, sender) => {
-  if (msg.type === "CV_UPDATE_BADGE" && chrome.action) {
-    const count = msg.hiddenCount;
-    const text = count > 0 ? (count > 99 ? "99+" : String(count)) : "";
-    const tabId = sender.tab?.id;
-    if (tabId) {
-      chrome.action.setBadgeText({ text, tabId });
+  if (msg.type === "CV_UPDATE_BADGE") {
+    const api = chrome.action || chrome.browserAction;
+    if (api) {
+      const count = msg.hiddenCount;
+      const text = count > 0 ? (count > 99 ? "99+" : String(count)) : "";
+      const tabId = sender.tab?.id;
+      if (tabId) {
+        api.setBadgeText({ text, tabId });
+      }
     }
   }
 });

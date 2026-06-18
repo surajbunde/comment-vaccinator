@@ -261,7 +261,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const info = document.createElement("span");
       info.style.cssText = "flex:1;min-width:0;";
-      info.innerHTML = '<strong style="color:var(--text);">' + escapeHtml(p.name) + '</strong> <code style="font-size:10px;color:var(--muted);margin-left:4px;">/' + escapeHtml(p.patternSource) + '/' + escapeHtml(p.flags) + '</code>';
+      const nameEl = document.createElement("strong");
+      nameEl.style.color = "var(--text)";
+      nameEl.textContent = p.name;
+      const codeEl = document.createElement("code");
+      codeEl.style.cssText = "font-size:10px;color:var(--muted);margin-left:4px;";
+      codeEl.textContent = "/" + p.patternSource + "/" + p.flags;
+      info.appendChild(nameEl);
+      info.appendChild(codeEl);
 
       const btnWrap = document.createElement("span");
       btnWrap.style.cssText = "display:flex;gap:2px;margin-left:8px;";
