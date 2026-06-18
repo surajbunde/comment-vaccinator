@@ -140,6 +140,26 @@ Use at least 3-5 videos with active comments and validate:
 - Date detection is heuristic and language/locale biased (English + Hindi/Devanagari supported).
 - Some short non-date comments may still be filtered depending on threshold settings.
 
+## Firefox Gotchas
+
+| Issue | Details | Solution |
+|-------|---------|----------|
+| **MV3 not supported on Android** | Firefox Android doesn't auto-inject MV3 content scripts (Mozilla bug #1872890) | Use MV2 (`manifest-firefox.json`) for Firefox builds |
+| **Badge API differs** | Firefox MV2 uses `chrome.browserAction`, Chrome MV3 uses `chrome.action` | `background.js` uses `chrome.action \|\| chrome.browserAction` |
+| **`data_collection_permissions` required** | Firefox addons now require this field in gecko settings | Must use `"required": ["none"]` array format (not boolean) |
+| **`strict_min_version` 142+** | `data_collection_permissions` requires Firefox 142+ | Set `strict_min_version: "142.0"` in `manifest-firefox.json` |
+| **Popup is full-screen on mobile** | Firefox Android shows popup as full-screen overlay | CSS uses `@media (max-width: 480px)` breakpoint |
+| **ZIP file locks** | Windows locks Firefox ZIP files when open in Explorer/Firefox | Close the file before rebuilding |
+
+### Browser-Specific Manifest Differences
+
+| Key | Chrome MV3 (`manifest.json`) | Firefox MV2 (`manifest-firefox.json`) |
+|-----|------------------------------|----------------------------------------|
+| Action | `action` | `browser_action` |
+| Background | `service_worker` | `background.scripts` |
+| Permissions | `["storage"]` | `["storage", "https://www.youtube.com/*", "https://m.youtube.com/*"]` |
+| Badge | `chrome.action` | `chrome.browserAction` |
+
 ## Contributing / Customization
 
 Common tweaks:
