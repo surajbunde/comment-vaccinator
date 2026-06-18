@@ -1,6 +1,13 @@
 build/
+build-*/
 .claude/
 .playwright-cli/
 .playwright/
+.serena/
 node_modules/
+content.js
 *.log
+*.yaml
+Thumbs.db
+.DS_Store
+.env

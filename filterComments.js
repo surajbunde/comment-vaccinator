@@ -7,8 +7,8 @@ const DATE_PATTERNS = [
   /(?:^|[^a-z0-9])\d{1,2}(?:st|nd|rd|th)?\s*(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)(?:\s+\d{2,4})?\b/i,
   /\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+\d{4}\b/i,
   /\b\d{4}\s+(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b/i,
-  /\b\d{1,2}[\/.-]\d{1,2}(?:[\/.-](?:\d{2}|\d{4}))\b/,
-  /\b(?:19|20)\d{2}[\/.-]\d{1,2}[\/.-]\d{1,2}\b/,
+  /\b\d{1,2}\s*[\/.-]\s*\d{1,2}(?:\s*[\/.-]\s*(?:\d{2}|\d{4}))\b/,
+  /\b(?:19|20)\d{2}\s*[\/.-]\s*\d{1,2}\s*[\/.-]\s*\d{1,2}\b/,
   /(?:^|[^\p{L}\p{N}_])(?:\d{1,2}|[०-९]{1,2})\s*(?:जनवरी|फ़रवरी|फरवरी|मार्च|अप्रैल|एप्रिल|मई|मे|जून|जुलै|जुलाई|अगस्त|ऑगस्ट|सितंबर|सितम्बर|सप्टेंबर|अक्टूबर|ऑक्टोबर|नवंबर|नवम्बर|नोव्हेंबर|दिसंबर|दिसम्बर|डिसेंबर)(?:\s*(?:\d{2,4}|[०-९]{2,4}))?/iu,
   /(?:^|[^\p{L}\p{N}_])(?:जनवरी|फ़रवरी|फरवरी|मार्च|अप्रैल|एप्रिल|मई|मे|जून|जुलै|जुलाई|अगस्त|ऑगस्ट|सितंबर|सितम्बर|सप्टेंबर|अक्टूबर|ऑक्टोबर|नवंबर|नवम्बर|नोव्हेंबर|दिसंबर|दिसम्बर|डिसेंबर)\s*(?:\d{1,2}|[०-९]{1,2})(?:\s*(?:\d{2,4}|[०-९]{2,4}))?/iu,
   /\banyone\s+today\b/i,
@@ -23,7 +23,8 @@ let currentCounts = {
   visible: 0,
   breakdown: {
     date: 0,
-    keyword: 0
+    keyword: 0,
+    wordcount: 0
   }
 };
 let observer = null;
@@ -34,7 +35,8 @@ let settings = {
     wordCountValue: 12,
     keywordEnabled: false,
     keywordList: [],
-    emojiFilterEnabled: true // NEW DEFAULT
+    emojiFilterEnabled: true,
+    emojiOnlyEnabled: false
 };
 
 // --- CORE CHECK FUNCTIONS ---
@@ -90,6 +92,13 @@ function checkCommentIsWordCountFiltered(text) {
   return false;
 }
 
+function checkCommentIsEmojiOnly(text) {
+  if (!settings.emojiOnlyEnabled) return false;
+  const emojiRegex = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]|\ufe0e|\ufe0f|\u200d)/g;
+  const stripped = text.replace(emojiRegex, '').replace(/\s+/g, '').trim();
+  return stripped.length === 0;
+}
+
 // --- FILTERING LOGIC ---
 
 function loadSettingsAndFilter() {
@@ -103,7 +112,8 @@ function loadSettingsAndFilter() {
     chrome.storage.local.get([
         'dateFilterEnabled',
         'wordCountEnabled', 'wordCountMode', 'wordCountValue',
-        'keywordEnabled', 'keywordList', 'emojiFilterEnabled' // NEW LOAD
+        'keywordEnabled', 'keywordList', 'emojiFilterEnabled',
+        'emojiOnlyEnabled'
     ], (data) => {
         if (chrome.runtime.lastError) {
           return;
@@ -114,7 +124,8 @@ function loadSettingsAndFilter() {
         settings.wordCountMode = data.wordCountMode || 'max';
         settings.wordCountValue = data.wordCountValue || 12; 
         settings.keywordEnabled = data.keywordEnabled !== undefined ? data.keywordEnabled : false;
-        settings.emojiFilterEnabled = data.emojiFilterEnabled !== undefined ? data.emojiFilterEnabled : true; // NEW ASSIGNMENT
+        settings.emojiFilterEnabled = data.emojiFilterEnabled !== undefined ? data.emojiFilterEnabled : true;
+        settings.emojiOnlyEnabled = data.emojiOnlyEnabled !== undefined ? data.emojiOnlyEnabled : false;
         
         settings.keywordList = data.keywordList ? data.keywordList.toLowerCase().split(',').map(k => k.trim()).filter(k => k.length > 0) : [];
 
@@ -126,83 +137,155 @@ function loadSettingsAndFilter() {
     }
 }
 
+const COMMENTS_SECTION_SELECTORS = [
+  '#comments',
+  'ytm-engagement-panel-section-list-renderer.engagement-panel-comments-section'
+];
+
+const THREAD_SELECTORS = [
+  'ytd-comment-thread-renderer',
+  'ytm-comment-thread-renderer'
+];
+
+const TEXT_SELECTORS = [
+  '#content-text',
+  '.comment-text',
+  '[slot="content"]',
+  '.comment-content',
+  '.YtmCommentRendererText'
+];
+
+function findCommentBlocks() {
+  for (const sel of THREAD_SELECTORS) {
+    const found = document.querySelectorAll(sel);
+    if (found.length > 0) return found;
+  }
+  for (const sel of COMMENTS_SECTION_SELECTORS) {
+    const section = document.querySelector(sel);
+    if (section) {
+      const items = section.querySelectorAll(TEXT_SELECTORS.join(','));
+      if (items.length > 0) {
+        const seen = new Set();
+        return Array.from(items).map(el => {
+          let parent = el.closest('ytd-comment-renderer, ytm-comment-renderer, [id]');
+          if (!parent || seen.has(parent)) return null;
+          seen.add(parent);
+          return parent;
+        }).filter(Boolean);
+      }
+    }
+  }
+  return [];
+}
+
+function getCommentText(block) {
+  for (const sel of TEXT_SELECTORS) {
+    const el = block.querySelector(sel);
+    if (el && el.textContent) return el.textContent.trim();
+  }
+  return '';
+}
+
 function filterAndCountComments() {
   currentCounts.total = 0;
   currentCounts.hidden = 0;
   currentCounts.visible = 0;
   currentCounts.breakdown.date = 0;
   currentCounts.breakdown.keyword = 0;
+  currentCounts.breakdown.wordcount = 0;
+  currentCounts.breakdown.emojionly = 0;
 
-  const commentBlocks = document.querySelectorAll('ytd-comment-thread-renderer'); 
+  const commentBlocks = findCommentBlocks();
   
   commentBlocks.forEach(block => {
-    const commentTextElement = block.querySelector('#content-text'); 
+    const commentText = getCommentText(block);
+    if (!commentText) return;
 
-    if (commentTextElement && commentTextElement.textContent) {
-      currentCounts.total++;
-      const commentText = commentTextElement.textContent.trim();
-      
-      let shouldHide = false;
-      let hideReason = null;
-      
-      // 1. DATE Filter
-      const isDateMatch = settings.dateFilterEnabled && checkCommentIsDate(commentText);
-      const isKeywordMatch = checkCommentIsKeyword(commentText);
+    currentCounts.total++;
+    
+    let shouldHide = false;
+    let hideReason = null;
+    
+    const isDateMatch = settings.dateFilterEnabled && checkCommentIsDate(commentText);
+    const isKeywordMatch = checkCommentIsKeyword(commentText);
+    const isWordCountMatch = checkCommentIsWordCountFiltered(commentText);
+    const isEmojiOnly = checkCommentIsEmojiOnly(commentText);
 
-      if (isDateMatch) {
-        // Date-filter toggle should always hide matched date comments.
-        shouldHide = true;
-        hideReason = 'date';
+    if (isDateMatch) {
+      shouldHide = true;
+      hideReason = 'date';
+    }
+    
+    if (isKeywordMatch) {
+      shouldHide = true;
+      hideReason = 'keyword';
+    }
+    
+    if (isWordCountMatch) {
+      shouldHide = true;
+      hideReason = 'wordcount';
+    }
+    
+    if (isEmojiOnly) {
+      shouldHide = true;
+      hideReason = 'emojionly';
+    }
+    
+    if (shouldHide) {
+      block.style.display = 'none';
+      currentCounts.hidden++;
+      if (hideReason === 'date') {
+        currentCounts.breakdown.date++;
+      } else if (hideReason === 'keyword') {
+        currentCounts.breakdown.keyword++;
+      } else if (hideReason === 'wordcount') {
+        currentCounts.breakdown.wordcount++;
+      } else if (hideReason === 'emojionly') {
+        currentCounts.breakdown.emojionly++;
       }
-      
-      // 2. KEYWORD Filter
-      if (isKeywordMatch) {
-        shouldHide = true;
-        // Keyword takes precedence in the legend when both match.
-        hideReason = 'keyword';
-      }
-      
-      if (shouldHide) {
-        block.style.display = 'none'; 
-        currentCounts.hidden++;
-        if (hideReason === 'date') {
-          currentCounts.breakdown.date++;
-        } else if (hideReason === 'keyword') {
-          currentCounts.breakdown.keyword++;
-        }
-      } else {
-        block.style.display = ''; 
-        currentCounts.visible++;
-      }
+    } else {
+      block.style.display = '';
+      currentCounts.visible++;
     }
   });
 }
 
 
+function findCommentsSection() {
+  for (const sel of COMMENTS_SECTION_SELECTORS) {
+    const el = document.querySelector(sel);
+    if (el) return el;
+  }
+  return null;
+}
+
 function startObservation() {
   let timeoutId = null;
-  const commentSection = document.getElementById('comments');
-  
-  if (!commentSection) {
-      setTimeout(startObservation, 500);
+  let retries = 0;
+  const maxRetries = 30;
+
+  function tryObserve() {
+    const commentSection = findCommentsSection();
+    if (!commentSection) {
+      if (retries++ < maxRetries) setTimeout(tryObserve, 500);
       return;
+    }
+
+    let targetNode = commentSection.querySelector('#contents, #items');
+    if (!targetNode) targetNode = commentSection;
+
+    observer = new MutationObserver(() => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(loadSettingsAndFilter, 300);
+    });
+
+    observer.observe(targetNode, { childList: true, subtree: true });
+    loadSettingsAndFilter();
+    setTimeout(loadSettingsAndFilter, 1000);
+    setTimeout(loadSettingsAndFilter, 3000);
   }
-  
-  const targetNode = commentSection.querySelector('#contents');
-  if (!targetNode) {
-      setTimeout(startObservation, 500);
-      return;
-  }
 
-  observer = new MutationObserver(() => {
-    if (timeoutId) clearTimeout(timeoutId);
-    timeoutId = setTimeout(loadSettingsAndFilter, 300); 
-  });
-
-  observer.observe(targetNode, { childList: true, subtree: true });
-
-  loadSettingsAndFilter(); 
-  setTimeout(loadSettingsAndFilter, 1000); 
+  tryObserve();
 }
 
 startObservation();
