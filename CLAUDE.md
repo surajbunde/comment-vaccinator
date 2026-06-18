@@ -12,6 +12,17 @@ Outputs to `build/`:
 - `comment-vaccinator-firefox-v1.3.1.zip`
 - `chrome-unpacked/` (for "Load unpacked" testing)
 
+Build runs `validate.cjs` automatically — blocks on manifest errors.
+
+## Validate
+```bash
+npm run validate
+```
+Pre-build manifest validation checks:
+- Chrome MV3: manifest_version, permissions, action, service_worker
+- Firefox MV2: manifest_version, browser_action, background.scripts, data_collection_permissions, strict_min_version >= 142
+- Cross-check: version numbers match between manifests
+
 ## Test
 ```bash
 npm test
@@ -36,6 +47,7 @@ npm test
 | `manifest.json` | Chrome MV3 |
 | `manifest-firefox.json` | Firefox MV2 (desktop + Android) |
 | `build.cjs` | esbuild bundler + zip creator |
+| `validate.cjs` | Pre-build manifest validation (Chrome MV3 + Firefox MV2) |
 | `package.json` | esbuild devDependency, scripts |
 
 ## Architecture
@@ -131,6 +143,26 @@ v1.4.2-chore-update-esbuild
 - **Root cause:** `background.js` uses `chrome.action.setBadgeText()` which is MV3-only. Firefox MV2 uses `chrome.browserAction.setBadgeText()`.
 - **Fix needed:** Add browser detection and use `chrome.browserAction` for Firefox MV2 in `background.js`
 - **Status:** To be fixed in Phase 4
+
+## Firefox Gotchas
+
+| Issue | Details | Solution |
+|-------|---------|----------|
+| **MV3 not supported on Android** | Firefox Android doesn't auto-inject MV3 content scripts (Mozilla bug #1872890) | Use MV2 (`manifest-firefox.json`) for Firefox builds |
+| **Badge API differs** | Firefox MV2 uses `chrome.browserAction`, Chrome MV3 uses `chrome.action` | `background.js` uses `chrome.action \|\| chrome.browserAction` |
+| **`data_collection_permissions` required** | Firefox addons now require this field in gecko settings | Must use `"required": ["none"]` array format (not boolean) |
+| **`strict_min_version` 142+** | `data_collection_permissions` requires Firefox 142+ | Set `strict_min_version: "142.0"` in `manifest-firefox.json` |
+| **Popup is full-screen on mobile** | Firefox Android shows popup as full-screen overlay | CSS uses `@media (max-width: 480px)` breakpoint |
+| **ZIP file locks** | Windows locks Firefox ZIP files when open in Explorer/Firefox | Close the file before rebuilding |
+
+### Browser-Specific Manifest Differences
+
+| Key | Chrome MV3 (`manifest.json`) | Firefox MV2 (`manifest-firefox.json`) |
+|-----|------------------------------|----------------------------------------|
+| Action | `action` | `browser_action` |
+| Background | `service_worker` | `background.scripts` |
+| Permissions | `["storage"]` | `["storage", "https://www.youtube.com/*", "https://m.youtube.com/*"]` |
+| Badge | `chrome.action` | `chrome.browserAction` |
 
 ## Firefox Android Testing
 
