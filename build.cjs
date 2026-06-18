@@ -3,6 +3,13 @@ const path = require("path");
 const { execSync } = require("child_process");
 const { buildSync } = require("esbuild");
 
+// 0. Validate manifests before building
+try {
+  execSync("node validate.cjs", { stdio: "inherit" });
+} catch (_) {
+  process.exit(1);
+}
+
 const VER = JSON.parse(fs.readFileSync("manifest.json", "utf8")).version;
 const BUILD = "build";
 
