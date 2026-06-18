@@ -200,6 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const patternError = document.getElementById("pattern-error");
 
   let customPatterns = [];
+  let editingIndex = -1;
 
   function validateRegex(source, flags) {
     try {
@@ -210,6 +211,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function setFormMode(mode) {
+    if (mode === "edit") {
+      patternAddBtn.textContent = "Save changes";
+      patternAddBtn.style.background = "var(--accent-c)";
+    } else {
+      patternAddBtn.textContent = "Add pattern";
+      patternAddBtn.style.background = "";
+      editingIndex = -1;
+    }
+    patternError.textContent = "";
+    patternTestResult.textContent = "";
+  }
+
   function renderPatternList() {
     patternList.innerHTML = "";
     if (customPatterns.length === 0) {
@@ -218,24 +232,43 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     customPatterns.forEach((p, i) => {
       const li = document.createElement("li");
-      li.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border:1px solid var(--line);border-radius:6px;margin-bottom:4px;font-size:12px;background:rgba(255,255,255,0.15);";
+      li.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border:1px solid var(--line);border-radius:6px;margin-bottom:4px;font-size:12px;background:rgba(255,255,255,0.15);" + (editingIndex === i ? "border-color:var(--accent-c);" : "");
 
       const info = document.createElement("span");
       info.style.cssText = "flex:1;min-width:0;";
       info.innerHTML = '<strong style="color:var(--text);">' + escapeHtml(p.name) + '</strong> <code style="font-size:10px;color:var(--muted);margin-left:4px;">/' + escapeHtml(p.patternSource) + '/' + escapeHtml(p.flags) + '</code>';
 
+      const btnWrap = document.createElement("span");
+      btnWrap.style.cssText = "display:flex;gap:2px;margin-left:8px;";
+
+      const editBtn = document.createElement("button");
+      editBtn.textContent = "\u270e";
+      editBtn.title = "Edit pattern";
+      editBtn.style.cssText = "border:none;background:none;color:var(--accent-a);font-size:14px;cursor:pointer;padding:0 4px;";
+      editBtn.addEventListener("click", () => {
+        editingIndex = i;
+        patternName.value = p.name;
+        patternSource.value = p.patternSource;
+        setFormMode("edit");
+        renderPatternList();
+        patternName.focus();
+      });
+
       const delBtn = document.createElement("button");
       delBtn.textContent = "\u00d7";
       delBtn.title = "Delete pattern";
-      delBtn.style.cssText = "border:none;background:none;color:#e74c3c;font-size:16px;cursor:pointer;padding:0 4px;margin-left:8px;";
+      delBtn.style.cssText = "border:none;background:none;color:#e74c3c;font-size:16px;cursor:pointer;padding:0 4px;";
       delBtn.addEventListener("click", () => {
+        if (editingIndex === i) setFormMode("add");
         customPatterns.splice(i, 1);
         saveCustomPatterns();
         renderPatternList();
       });
 
+      btnWrap.appendChild(editBtn);
+      btnWrap.appendChild(delBtn);
       li.appendChild(info);
-      li.appendChild(delBtn);
+      li.appendChild(btnWrap);
       patternList.appendChild(li);
     });
   }
@@ -306,12 +339,21 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    if (customPatterns.some((p) => p.name === name)) {
-      patternError.textContent = "A pattern with this name already exists.";
-      return;
+    if (editingIndex >= 0) {
+      if (customPatterns.some((p, idx) => idx !== editingIndex && p.name === name)) {
+        patternError.textContent = "Another pattern with this name already exists.";
+        return;
+      }
+      customPatterns[editingIndex] = { name, patternSource: source, flags: "i" };
+      setFormMode("add");
+    } else {
+      if (customPatterns.some((p) => p.name === name)) {
+        patternError.textContent = "A pattern with this name already exists.";
+        return;
+      }
+      customPatterns.push({ name, patternSource: source, flags: "i" });
     }
 
-    customPatterns.push({ name, patternSource: source, flags: "i" });
     saveCustomPatterns();
     renderPatternList();
 
@@ -319,6 +361,16 @@ document.addEventListener("DOMContentLoaded", () => {
     patternSource.value = "";
     patternTestInput.value = "";
     patternTestResult.textContent = "";
+  });
+
+  patternName.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      setFormMode("add");
+      patternName.value = "";
+      patternSource.value = "";
+      patternTestInput.value = "";
+      renderPatternList();
+    }
   });
 
   // Load existing custom patterns
