@@ -202,6 +202,19 @@ document.addEventListener("DOMContentLoaded", () => {
   let customPatterns = [];
   let editingIndex = -1;
 
+  const PRESET_PATTERNS = [
+    { name: "first-comment", patternSource: "\\bfirst\\b", flags: "i" },
+    { name: "sub4sub", patternSource: "\\bsub\\s*(?:4|for)\\s*sub\\b", flags: "i" },
+    { name: "like-equals", patternSource: "\\blike\\s*=\\s*\\d+", flags: "i" },
+    { name: "anyone-year", patternSource: "\\b(?:anyone|who)(?:\\s+\\w+){0,2}\\s+(?:in\\s+)?\\d{4}\\b", flags: "i" },
+    { name: "pls-sub", patternSource: "\\bplz?\\b", flags: "i" },
+    { name: "who-else", patternSource: "\\bwho\\s+else\\b", flags: "i" },
+    { name: "im-early", patternSource: "\\b(?:i'm|i am)\\s+(?:early|here\\s+first)\\b", flags: "i" },
+    { name: "dont-scroll", patternSource: "\\bdon'?t\\s+scroll\\b", flags: "i" },
+    { name: "like-for-part", patternSource: "\\blike\\s+(?:for|to)\\s+(?:part|pt)\\s*\\d+\\b", flags: "i" },
+    { name: "comment-for", patternSource: "\\bcomment\\s+\\w+\\s+for\\b", flags: "i" },
+  ];
+
   function validateRegex(source, flags) {
     try {
       new RegExp(source, flags);
@@ -373,13 +386,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Load existing custom patterns
-  chrome.storage.local.get(["cv_customPatterns"], (data) => {
+  // Load existing custom patterns, merge with presets
+  chrome.storage.local.get(["cv_customPatterns", "cv_presetsInitialized"], (data) => {
     try {
       customPatterns = JSON.parse(data.cv_customPatterns || "[]");
     } catch (_) {
       customPatterns = [];
     }
+
+    if (!data.cv_presetsInitialized) {
+      const existingNames = new Set(customPatterns.map((p) => p.name));
+      for (const preset of PRESET_PATTERNS) {
+        if (!existingNames.has(preset.name)) {
+          customPatterns.push({ ...preset });
+        }
+      }
+      chrome.storage.local.set({
+        cv_customPatterns: JSON.stringify(customPatterns),
+        cv_presetsInitialized: true,
+      });
+    }
+
     renderPatternList();
   });
 });
