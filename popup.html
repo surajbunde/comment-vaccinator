@@ -492,6 +492,23 @@
     <textarea id="keywordList" placeholder="e.g., ad, sponsor, first, subscribe"></textarea>
   </div>
 
+  <details id="pattern-editor-section" class="setting-group">
+    <summary style="cursor:pointer;font-weight:600;font-size:13px;">Custom Patterns</summary>
+    <ul id="pattern-list" style="list-style:none;padding:0;margin:8px 0 0;"></ul>
+    <div class="pattern-form" style="margin-top:8px;">
+      <input id="pattern-name" type="text" placeholder="Pattern name (e.g. time-ago-es)" style="width:calc(100% - 12px);padding:6px;border:1px solid var(--line);border-radius:6px;font-size:12px;margin-bottom:6px;color:var(--text);background:var(--input-bg);" />
+      <input id="pattern-source" type="text" placeholder="Regex source (e.g. hace \d+ horas)" style="width:calc(100% - 12px);padding:6px;border:1px solid var(--line);border-radius:6px;font-size:12px;margin-bottom:6px;color:var(--text);background:var(--input-bg);font-family:monospace;" />
+      <input id="pattern-flags" type="text" placeholder="Flags" value="i" maxlength="5" style="width:60px;padding:6px;border:1px solid var(--line);border-radius:6px;font-size:12px;margin-bottom:6px;color:var(--text);background:var(--input-bg);font-family:monospace;" />
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;">
+        <input id="pattern-test-input" type="text" placeholder="Test against this text..." style="flex:1;padding:6px;border:1px solid var(--line);border-radius:6px;font-size:12px;color:var(--text);background:var(--input-bg);" />
+        <button id="pattern-test-btn" style="padding:6px 10px;border:1px solid var(--line);border-radius:6px;font-size:12px;cursor:pointer;background:var(--input-bg);color:var(--text);">Test</button>
+        <span id="pattern-test-result" style="font-size:12px;"></span>
+      </div>
+      <button id="pattern-add-btn" style="padding:6px 12px;border:none;border-radius:6px;font-size:12px;cursor:pointer;color:#fff;background:linear-gradient(125deg,var(--accent-a),var(--accent-b));">Add pattern</button>
+      <span id="pattern-error" style="color:#e74c3c;font-size:11px;margin-left:8px;"></span>
+    </div>
+  </details>
+
   <div class="counts-wrap">
     <div class="counts-head">
       <p class="counts-title">Comment Stats</p>

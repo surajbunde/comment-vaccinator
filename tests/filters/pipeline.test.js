@@ -161,6 +161,50 @@ describe("runPipeline", () => {
     assert.equal(result.hide, true);
     assert.equal(result.patternName, "spanish-time");
   });
+
+  it("does not hide when custom pattern does not match", () => {
+    const result = runPipeline("great video", {
+      ...baseSettings,
+      dateFilterEnabled: true,
+      customPatterns: [{ name: "spanish-time", pattern: /hace \d+ horas/ }],
+    });
+    assert.equal(result.hide, false);
+  });
+
+  it("does not check custom patterns when dateFilterEnabled is false", () => {
+    const result = runPipeline("hace 3 horas", {
+      ...baseSettings,
+      dateFilterEnabled: false,
+      customPatterns: [{ name: "spanish-time", pattern: /hace \d+ horas/ }],
+    });
+    assert.equal(result.hide, false);
+  });
+
+  it("hides match from first matching custom pattern", () => {
+    const result = runPipeline("hace 5 horas", {
+      ...baseSettings,
+      dateFilterEnabled: true,
+      customPatterns: [
+        { name: "spanish-time", pattern: /hace \d+ horas/ },
+        { name: "another", pattern: /xyz/ },
+      ],
+    });
+    assert.equal(result.hide, true);
+    assert.equal(result.patternName, "spanish-time");
+  });
+
+  it("hides match from second custom pattern when first does not match", () => {
+    const result = runPipeline("abc xyz def", {
+      ...baseSettings,
+      dateFilterEnabled: true,
+      customPatterns: [
+        { name: "spanish-time", pattern: /hace \d+ horas/ },
+        { name: "another", pattern: /xyz/ },
+      ],
+    });
+    assert.equal(result.hide, true);
+    assert.equal(result.patternName, "another");
+  });
 });
 
 describe("word count filter", () => {

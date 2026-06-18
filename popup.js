@@ -188,4 +188,150 @@ document.addEventListener("DOMContentLoaded", () => {
       countsPollingTimer = null;
     }
   });
+
+  // --- D. Custom Pattern Editor ---
+  const patternList = document.getElementById("pattern-list");
+  const patternName = document.getElementById("pattern-name");
+  const patternSource = document.getElementById("pattern-source");
+  const patternFlags = document.getElementById("pattern-flags");
+  const patternTestInput = document.getElementById("pattern-test-input");
+  const patternTestBtn = document.getElementById("pattern-test-btn");
+  const patternTestResult = document.getElementById("pattern-test-result");
+  const patternAddBtn = document.getElementById("pattern-add-btn");
+  const patternError = document.getElementById("pattern-error");
+
+  let customPatterns = [];
+
+  function validateRegex(source, flags) {
+    try {
+      new RegExp(source, flags);
+      return { valid: true, error: null };
+    } catch (e) {
+      return { valid: false, error: e.message };
+    }
+  }
+
+  function renderPatternList() {
+    patternList.innerHTML = "";
+    if (customPatterns.length === 0) {
+      patternList.innerHTML = '<li style="font-size:11px;color:var(--muted);padding:4px 0;">No custom patterns yet.</li>';
+      return;
+    }
+    customPatterns.forEach((p, i) => {
+      const li = document.createElement("li");
+      li.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border:1px solid var(--line);border-radius:6px;margin-bottom:4px;font-size:12px;background:rgba(255,255,255,0.15);";
+
+      const info = document.createElement("span");
+      info.style.cssText = "flex:1;min-width:0;";
+      info.innerHTML = '<strong style="color:var(--text);">' + escapeHtml(p.name) + '</strong> <code style="font-size:10px;color:var(--muted);margin-left:4px;">/' + escapeHtml(p.patternSource) + '/' + escapeHtml(p.flags) + '</code>';
+
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "\u00d7";
+      delBtn.title = "Delete pattern";
+      delBtn.style.cssText = "border:none;background:none;color:#e74c3c;font-size:16px;cursor:pointer;padding:0 4px;margin-left:8px;";
+      delBtn.addEventListener("click", () => {
+        customPatterns.splice(i, 1);
+        saveCustomPatterns();
+        renderPatternList();
+      });
+
+      li.appendChild(info);
+      li.appendChild(delBtn);
+      patternList.appendChild(li);
+    });
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  function saveCustomPatterns() {
+    const raw = customPatterns.map((p) => ({
+      name: p.name,
+      patternSource: p.patternSource,
+      flags: p.flags,
+    }));
+    chrome.storage.local.set({ cv_customPatterns: JSON.stringify(raw) }, () => {
+      chrome.tabs.query({ url: "*://*.youtube.com/*" }, (tabs) => {
+        tabs.forEach((tab) => {
+          chrome.tabs.sendMessage(tab.id, { type: "REFILTER_NOW" }, () => {
+            if (chrome.runtime.lastError) {}
+          });
+        });
+      });
+    });
+  }
+
+  patternTestBtn.addEventListener("click", () => {
+    const source = patternSource.value.trim();
+    const flags = patternFlags.value.trim();
+    const testText = patternTestInput.value;
+
+    patternError.textContent = "";
+    patternTestResult.textContent = "";
+
+    if (!source) {
+      patternError.textContent = "Enter a regex pattern first.";
+      return;
+    }
+
+    const result = validateRegex(source, flags);
+    if (!result.valid) {
+      patternError.textContent = result.error;
+      return;
+    }
+
+    const regex = new RegExp(source, flags);
+    const matched = regex.test(testText);
+    patternTestResult.textContent = matched ? "\u2713 Match" : "\u2717 No match";
+    patternTestResult.style.color = matched ? "#27ae60" : "#e74c3c";
+  });
+
+  patternAddBtn.addEventListener("click", () => {
+    const name = patternName.value.trim();
+    const source = patternSource.value.trim();
+    const flags = patternFlags.value.trim();
+
+    patternError.textContent = "";
+
+    if (!name) {
+      patternError.textContent = "Pattern name is required.";
+      return;
+    }
+    if (!source) {
+      patternError.textContent = "Regex source is required.";
+      return;
+    }
+
+    const result = validateRegex(source, flags);
+    if (!result.valid) {
+      patternError.textContent = result.error;
+      return;
+    }
+
+    if (customPatterns.some((p) => p.name === name)) {
+      patternError.textContent = "A pattern with this name already exists.";
+      return;
+    }
+
+    customPatterns.push({ name, patternSource: source, flags });
+    saveCustomPatterns();
+    renderPatternList();
+
+    patternName.value = "";
+    patternSource.value = "";
+    patternFlags.value = "i";
+    patternTestInput.value = "";
+    patternTestResult.textContent = "";
+  });
+
+  // Load existing custom patterns
+  chrome.storage.local.get(["cv_customPatterns"], (data) => {
+    try {
+      customPatterns = JSON.parse(data.cv_customPatterns || "[]");
+    } catch (_) {
+      customPatterns = [];
+    }
+    renderPatternList();
+  });
 });
