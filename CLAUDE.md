@@ -16,7 +16,7 @@ Outputs to `build/`:
 ```bash
 npm test
 ```
-127+ tests covering all matchers, pipeline logic, word count edge cases, and custom pattern validation.
+128 tests covering all matchers, pipeline logic, word count edge cases, and custom pattern validation.
 
 ## Key Files
 
@@ -72,6 +72,8 @@ npm test
 | `cv_whitelist` | string | `""` |
 | `cv_emojiOnlyEnabled` | boolean | `false` |
 | `cv_customPatterns` | JSON string | `"[]"` |
+| `cv_customPatternsEnabled` | boolean | `false` |
+| `cv_presetsInitialized` | boolean | `false` |
 | `cv_perVideoDisabled` | JSON string | `"[]"` |
 | `cv_currentVideoId` | string | `""` |
 | `cv_debugMode` | boolean | `false` |
@@ -82,7 +84,7 @@ npm test
 2. **Emoji-only** — hides comments with only emoji characters
 3. **Keyword blacklist** — hides matching keywords (only if `keywordEnabled` is true)
 4. **Date pattern** — hides date mentions (only if `dateFilterEnabled` is true)
-5. **Custom patterns** — user-defined regex (only if `dateFilterEnabled` is true)
+5. **Custom patterns** — user-defined regex (only if `customPatternsEnabled` is true, independent of date filter)
 6. **Word count** — min/max threshold (only if `wordCountMode !== "off"`)
 
 ## Branch Naming Convention
@@ -170,3 +172,4 @@ Popup opens as a full-screen overlay. CSS uses `@media (max-width: 480px)` break
 | Strip Emojis | `stripEmoji` | Modifier for word count — strips emojis before counting |
 | Keyword Blacklist | `keywordEnabled` + `blacklist` | Hides comments matching comma-separated keywords |
 | Emoji-Only | `emojiOnlyEnabled` | Hides comments containing ONLY emoji characters |
+| Custom Patterns | `customPatternsEnabled` + `customPatterns` | User-defined regex patterns (10 presets + custom) |

@@ -14,6 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const emojiOnlyEnabled = document.getElementById("emojiOnlyEnabled");
   const keywordEnabled = document.getElementById("keywordEnabled");
   const keywordList = document.getElementById("keywordList");
+  const customPatternsEnabled = document.getElementById("customPatternsEnabled");
+  const patternEditorBody = document.getElementById("patternEditorBody");
   const statsListBtn = document.getElementById("statsListBtn");
   const statsChartBtn = document.getElementById("statsChartBtn");
   const summaryList = document.getElementById("summaryList");
@@ -34,6 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "cv_blacklist",
       "cv_keywordEnabled",
       "cv_emojiOnlyEnabled",
+      "cv_customPatternsEnabled",
     ],
     (data) => {
       dateFilterEnabled.checked = data.cv_dateFilterEnabled !== undefined ? data.cv_dateFilterEnabled : true;
@@ -47,6 +50,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       keywordEnabled.checked = data.cv_keywordEnabled !== undefined ? data.cv_keywordEnabled : false;
       keywordList.value = data.cv_blacklist || "";
+
+      customPatternsEnabled.checked = data.cv_customPatternsEnabled !== undefined ? data.cv_customPatternsEnabled : false;
+      patternEditorBody.style.display = customPatternsEnabled.checked ? "block" : "none";
 
       // Initial UI state
       wordCountControls.style.display = wordCountEnabled.checked ? "block" : "none";
@@ -83,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
         cv_emojiOnlyEnabled: emojiOnlyEnabled.checked,
         cv_keywordEnabled: keywordEnabled.checked,
         cv_blacklist: keywordList.value.trim(),
+        cv_customPatternsEnabled: customPatternsEnabled.checked,
       },
       () => {
         // Notify content script to re-filter immediately.
@@ -103,6 +110,11 @@ document.addEventListener("DOMContentLoaded", () => {
   wordCountMode.addEventListener("change", saveSettings);
   wordCountValue.addEventListener("change", saveSettings);
   keywordEnabled.addEventListener("change", saveSettings);
+
+  customPatternsEnabled.addEventListener("change", () => {
+    patternEditorBody.style.display = customPatternsEnabled.checked ? "block" : "none";
+    saveSettings();
+  });
   keywordList.addEventListener("change", saveSettings);
   keywordList.addEventListener("blur", saveSettings);
   emojiFilterEnabled.addEventListener("change", saveSettings);
@@ -384,6 +396,14 @@ document.addEventListener("DOMContentLoaded", () => {
       patternTestInput.value = "";
       renderPatternList();
     }
+  });
+
+  const patternResetBtn = document.getElementById("pattern-reset-btn");
+  patternResetBtn.addEventListener("click", () => {
+    if (!confirm("Reset all custom patterns to the 10 default presets? This cannot be undone.")) return;
+    customPatterns = PRESET_PATTERNS.map((p) => ({ ...p }));
+    saveCustomPatterns();
+    renderPatternList();
   });
 
   // Load existing custom patterns, merge with presets

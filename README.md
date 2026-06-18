@@ -21,64 +21,85 @@ Hide repetitive YouTube comments that contain date-like phrases, while preservin
   - `max`: hide if comment has fewer words than threshold.
   - `min`: hide if comment has more words than threshold.
 - Optional strict emoji cleanup before word counting.
+- Emoji-only filter: hides comments containing ONLY emoji characters.
 - Keyword blacklist (comma-separated).
+- Keyword whitelist: overrides all other filters — matching comments always stay visible.
+- Custom regex patterns: 10 preset spam patterns + add/edit/delete your own (with `i` flag).
+- Custom patterns toggle: disabled by default — presets ship inactive until you enable them.
+- Reset to defaults: one-click reset restores all 10 presets.
 - Live re-filtering when YouTube loads more comments.
-- Popup stats: total, hidden, visible comments.
+- Popup stats: total, hidden, visible comments (list + chart view).
 
 ## Tech Stack
 
-- Manifest V3 extension
-- Content script for filtering (`filterComments.js`)
+- Chrome Manifest V3 + Firefox Manifest V2 (desktop + Android)
+- ES modules in `src/` bundled via esbuild to single `content.js`
 - Popup UI (`popup.html`, `popup.js`)
-- Local storage for settings (`chrome.storage.local`)
+- Local storage for settings (`chrome.storage.local`, `cv_` namespace)
+- `node:test` test harness (128 tests)
 
 ## Project Structure
 
-- `manifest.json` - extension manifest (MV3 + Firefox gecko ID block)
-- `filterComments.js` - comment matching + hide/show logic
-- `popup.html` - extension UI
-- `popup.js` - popup settings and messaging
-- `test-date-filter.js` - local smoke test for date-pattern quality
+- `manifest.json` - Chrome MV3 manifest
+- `manifest-firefox.json` - Firefox MV2 manifest (desktop + Android)
+- `src/matchers/datePatterns.js` - 17 date pattern matchers
+- `src/matchers/wordCount.js` - emoji stripping, word counting
+- `src/matchers/keywords.js` - blacklist/whitelist keyword matching
+- `src/filters/pipeline.js` - composes all matchers
+- `src/observer/commentObserver.js` - MutationObserver lifecycle
+- `src/storage/settingsCache.js` - settings cache with `cv_` namespace
+- `src/content/main.js` - content script entry point
+- `popup.html` - extension popup UI
+- `popup.js` - popup settings, custom pattern editor
+- `background.js` - default settings on install, badge
+- `build.cjs` - esbuild bundler + zip creator
 - `icon-32.png`, `icon-48.png`, `icon-128.png` - extension icons
 
 ## Local Development and Testing
 
-### 1. Quick Regex Smoke Test
-
-Prerequisite: Node.js installed.
+### 1. Install & Build
 
 ```bash
-node test-date-filter.js
+npm install
+npm run build
 ```
 
-Expected: `Summary: 31/31 checks passed`
+Outputs to `build/`:
+- `comment-vaccinator-chrome-v1.3.1.zip`
+- `comment-vaccinator-firefox-v1.3.1.zip`
+- `chrome-unpacked/` (for "Load unpacked" testing)
 
-If failures appear, tune date regex in `filterComments.js`, then rerun.
+### 2. Run Tests
 
-### 2. Load Unpacked in Chrome
+```bash
+npm test
+```
+
+128 tests covering all matchers, pipeline logic, word count edge cases, and custom pattern validation.
+
+### 3. Load Unpacked in Chrome
 
 1. Open `chrome://extensions`
 2. Enable **Developer mode**
 3. Click **Load unpacked**
-4. Select the project folder
+4. Select `build/chrome-unpacked/`
 5. Open any YouTube video with comments
 6. Open extension popup and test settings
 
-### 3. Load Unpacked in Edge
+### 4. Load Unpacked in Edge
 
 1. Open `edge://extensions`
 2. Enable **Developer mode**
 3. Click **Load unpacked**
-4. Select the project folder
+4. Select `build/chrome-unpacked/`
 5. Test on YouTube as above
 
-### 4. Temporary Add-on in Firefox
+### 5. Temporary Add-on in Firefox
 
-1. Zip the extension files
-2. Open `about:debugging#/runtime/this-firefox`
-3. Click **Load Temporary Add-on**
-4. Select `manifest.json`
-5. Open YouTube and validate behavior
+1. Open `about:debugging#/runtime/this-firefox`
+2. Click **Load Temporary Add-on**
+3. Select `manifest.json` from project root
+4. Open YouTube and validate behavior
 
 ## Manual Test Checklist
 
@@ -89,18 +110,23 @@ Use at least 3-5 videos with active comments and validate:
 3. Date Filter OFF: date-like comments reappear immediately.
 4. Word-count `max` and `min` modes behave correctly when Date Filter is ON.
 5. Keyword blacklist hides matching comments even when Date Filter is OFF.
-6. Toggling popup controls triggers live re-filtering.
-7. Page navigation within YouTube still preserves behavior.
+6. Emoji-only filter hides comments with only emoji characters.
+7. Keyword whitelist overrides all other filters — matching comments always visible.
+8. Custom patterns: enable toggle, verify preset patterns hide matching comments.
+9. Custom patterns: add/edit/delete patterns, verify changes take effect immediately.
+10. Custom patterns: "Reset to defaults" restores all 10 presets.
+11. Toggling popup controls triggers live re-filtering.
+12. Page navigation within YouTube still preserves behavior.
 
 ## Release Readiness Checklist
 
 1. Validate manifest JSON syntax (no comments, no trailing commas).
-2. Verify required permissions only (`storage`, `tabs`).
-3. Confirm no unused background scripts.
-4. Run `node test-date-filter.js`.
+2. Verify required permissions only (`storage`).
+3. Run `npm test` — all 128 tests passing.
+4. Run `npm run build` — zips + unpacked folder created.
 5. Perform manual test checklist on Chrome + Firefox + Edge.
 6. Prepare screenshots + description for store listings.
-7. Increment `version` before each store submission.
+7. Increment `version` in both manifests before each store submission.
 
 ## Browser Publishing Notes
 
@@ -118,9 +144,10 @@ Use at least 3-5 videos with active comments and validate:
 
 Common tweaks:
 
-- Edit `DATE_PATTERNS` in `filterComments.js` to tune sensitivity.
-- Adjust default threshold in `settings.wordCountValue`.
-- Expand keyword behavior (exact-match vs contains).
+- Edit `DATE_PATTERNS` in `src/matchers/datePatterns.js` to tune date sensitivity.
+- Adjust default threshold in `cv_wordCountValue` storage key.
+- Add custom regex patterns via the popup UI (Advanced: Custom Patterns section).
+- Edit `PRESET_PATTERNS` in `popup.js` to change default presets.
 
 ## License
 
