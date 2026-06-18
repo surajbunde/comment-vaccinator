@@ -9,6 +9,7 @@
  *   cv_blacklist           {string}   Comma-separated blacklist keywords. Default: ''.
  *   cv_whitelist           {string}   Comma-separated whitelist keywords. Default: ''.
  *   cv_customPatterns      {string}   JSON array of {name, patternSource, flags} objects. Default: '[]'.
+ *   cv_customPatternsEnabled {boolean} Enable custom pattern filtering. Default: false.
  *   cv_perVideoDisabled    {string}   JSON array of video IDs where filtering is off. Default: '[]'.
  *   cv_currentVideoId      {string}   Current YouTube video ID. Default: ''.
  *   cv_debugMode           {boolean}  Enable verbose logging. Default: false.
@@ -26,6 +27,7 @@ import { parseKeywordList } from "../matchers/keywords.js";
  * @property {string[]} blacklist         - Parsed, normalised array.
  * @property {string[]} whitelist         - Parsed, normalised array.
  * @property {boolean}  emojiOnlyEnabled
+ * @property {boolean}  customPatternsEnabled
  * @property {Array<{name:string, pattern:RegExp}>} customPatterns
  * @property {string[]} perVideoDisabled  - Array of YouTube video IDs.
  * @property {string}   currentVideoId
@@ -41,6 +43,7 @@ const DEFAULTS = {
   cv_blacklist: "",
   cv_whitelist: "",
   cv_emojiOnlyEnabled: false,
+  cv_customPatternsEnabled: false,
   cv_customPatterns: "[]",
   cv_perVideoDisabled: "[]",
   cv_currentVideoId: "",
@@ -90,6 +93,7 @@ function buildFromRaw(raw) {
     blacklist: parseKeywordList(raw.cv_blacklist ?? ""),
     whitelist: parseKeywordList(raw.cv_whitelist ?? ""),
     emojiOnlyEnabled: Boolean(raw.cv_emojiOnlyEnabled ?? false),
+    customPatternsEnabled: Boolean(raw.cv_customPatternsEnabled ?? false),
     customPatterns,
     perVideoDisabled,
     currentVideoId: raw.cv_currentVideoId ?? "",

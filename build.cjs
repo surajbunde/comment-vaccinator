@@ -3,7 +3,7 @@ const path = require("path");
 const { execSync } = require("child_process");
 const { buildSync } = require("esbuild");
 
-const VER = "1.3.0";
+const VER = JSON.parse(fs.readFileSync("manifest.json", "utf8")).version;
 const BUILD = "build";
 
 const STATIC_FILES = [

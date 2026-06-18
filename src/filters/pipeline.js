@@ -61,7 +61,7 @@ export function runPipeline(text, settings) {
   }
 
   // 5. Custom patterns.
-  if (settings.dateFilterEnabled && settings.customPatterns.length > 0) {
+  if (settings.customPatternsEnabled && settings.customPatterns.length > 0) {
     for (const { name, pattern } of settings.customPatterns) {
       if (pattern.test(text)) {
         return { hide: true, reason: "custom pattern", patternName: name };

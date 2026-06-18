@@ -8,15 +8,15 @@ Browser extension that filters YouTube comments by date mentions, keyword blackl
 npm run build
 ```
 Outputs to `build/`:
-- `comment-vaccinator-chrome-v1.3.0.zip`
-- `comment-vaccinator-firefox-v1.3.0.zip`
+- `comment-vaccinator-chrome-v1.3.1.zip`
+- `comment-vaccinator-firefox-v1.3.1.zip`
 - `chrome-unpacked/` (for "Load unpacked" testing)
 
 ## Test
 ```bash
 npm test
 ```
-111+ tests covering all matchers, pipeline logic, and word count edge cases.
+128 tests covering all matchers, pipeline logic, word count edge cases, and custom pattern validation.
 
 ## Key Files
 
@@ -72,6 +72,8 @@ npm test
 | `cv_whitelist` | string | `""` |
 | `cv_emojiOnlyEnabled` | boolean | `false` |
 | `cv_customPatterns` | JSON string | `"[]"` |
+| `cv_customPatternsEnabled` | boolean | `false` |
+| `cv_presetsInitialized` | boolean | `false` |
 | `cv_perVideoDisabled` | JSON string | `"[]"` |
 | `cv_currentVideoId` | string | `""` |
 | `cv_debugMode` | boolean | `false` |
@@ -82,8 +84,29 @@ npm test
 2. **Emoji-only** — hides comments with only emoji characters
 3. **Keyword blacklist** — hides matching keywords (only if `keywordEnabled` is true)
 4. **Date pattern** — hides date mentions (only if `dateFilterEnabled` is true)
-5. **Custom patterns** — user-defined regex (only if `dateFilterEnabled` is true)
+5. **Custom patterns** — user-defined regex (only if `customPatternsEnabled` is true, independent of date filter)
 6. **Word count** — min/max threshold (only if `wordCountMode !== "off"`)
+
+## Branch Naming Convention
+
+Format: `{version}-{type}-{brief-description}`
+
+Types:
+- `phase` — implementation plan phases (e.g. `v1.3.1-phase-1-regex-pattern-editor`)
+- `feature` — new features outside the plan
+- `bugfix` — bug fixes
+- `hotfix` — urgent production fixes
+- `refactor` — code restructuring without behavior changes
+- `chore` — tooling, deps, config updates
+
+Examples:
+```
+v1.3.1-phase-1-regex-pattern-editor
+v1.3.1-phase-2-per-video-toggle
+v1.4.0-feature-keyword-export
+v1.4.1-bugfix-firefox-badge
+v1.4.2-chore-update-esbuild
+```
 
 ## Commit & PR Conventions
 
@@ -100,6 +123,14 @@ npm test
 - Screenshots if UI changes
 
 **Never commit with generic messages like "fix" or "update".**
+
+## Known Issues
+
+### Phase 4: Badge not working on Firefox
+- **Symptom:** Extension icon badge shows hidden comment count on Chrome but not on Firefox
+- **Root cause:** `background.js` uses `chrome.action.setBadgeText()` which is MV3-only. Firefox MV2 uses `chrome.browserAction.setBadgeText()`.
+- **Fix needed:** Add browser detection and use `chrome.browserAction` for Firefox MV2 in `background.js`
+- **Status:** To be fixed in Phase 4
 
 ## Firefox Android Testing
 
@@ -141,3 +172,4 @@ Popup opens as a full-screen overlay. CSS uses `@media (max-width: 480px)` break
 | Strip Emojis | `stripEmoji` | Modifier for word count — strips emojis before counting |
 | Keyword Blacklist | `keywordEnabled` + `blacklist` | Hides comments matching comma-separated keywords |
 | Emoji-Only | `emojiOnlyEnabled` | Hides comments containing ONLY emoji characters |
+| Custom Patterns | `customPatternsEnabled` + `customPatterns` | User-defined regex patterns (10 presets + custom) |
