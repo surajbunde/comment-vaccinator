@@ -193,7 +193,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const patternList = document.getElementById("pattern-list");
   const patternName = document.getElementById("pattern-name");
   const patternSource = document.getElementById("pattern-source");
-  const patternFlags = document.getElementById("pattern-flags");
   const patternTestInput = document.getElementById("pattern-test-input");
   const patternTestBtn = document.getElementById("pattern-test-btn");
   const patternTestResult = document.getElementById("pattern-test-result");
@@ -264,7 +263,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   patternTestBtn.addEventListener("click", () => {
     const source = patternSource.value.trim();
-    const flags = patternFlags.value.trim();
     const testText = patternTestInput.value;
 
     patternError.textContent = "";
@@ -275,13 +273,13 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const result = validateRegex(source, flags);
+    const result = validateRegex(source, "i");
     if (!result.valid) {
       patternError.textContent = result.error;
       return;
     }
 
-    const regex = new RegExp(source, flags);
+    const regex = new RegExp(source, "i");
     const matched = regex.test(testText);
     patternTestResult.textContent = matched ? "\u2713 Match" : "\u2717 No match";
     patternTestResult.style.color = matched ? "#27ae60" : "#e74c3c";
@@ -290,7 +288,6 @@ document.addEventListener("DOMContentLoaded", () => {
   patternAddBtn.addEventListener("click", () => {
     const name = patternName.value.trim();
     const source = patternSource.value.trim();
-    const flags = patternFlags.value.trim();
 
     patternError.textContent = "";
 
@@ -303,7 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const result = validateRegex(source, flags);
+    const result = validateRegex(source, "i");
     if (!result.valid) {
       patternError.textContent = result.error;
       return;
@@ -314,13 +311,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    customPatterns.push({ name, patternSource: source, flags });
+    customPatterns.push({ name, patternSource: source, flags: "i" });
     saveCustomPatterns();
     renderPatternList();
 
     patternName.value = "";
     patternSource.value = "";
-    patternFlags.value = "i";
     patternTestInput.value = "";
     patternTestResult.textContent = "";
   });
