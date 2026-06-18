@@ -12,6 +12,17 @@ Outputs to `build/`:
 - `comment-vaccinator-firefox-v1.3.1.zip`
 - `chrome-unpacked/` (for "Load unpacked" testing)
 
+Build runs `validate.cjs` automatically — blocks on manifest errors.
+
+## Validate
+```bash
+npm run validate
+```
+Pre-build manifest validation checks:
+- Chrome MV3: manifest_version, permissions, action, service_worker
+- Firefox MV2: manifest_version, browser_action, background.scripts, data_collection_permissions, strict_min_version >= 142
+- Cross-check: version numbers match between manifests
+
 ## Test
 ```bash
 npm test
@@ -36,6 +47,7 @@ npm test
 | `manifest.json` | Chrome MV3 |
 | `manifest-firefox.json` | Firefox MV2 (desktop + Android) |
 | `build.cjs` | esbuild bundler + zip creator |
+| `validate.cjs` | Pre-build manifest validation (Chrome MV3 + Firefox MV2) |
 | `package.json` | esbuild devDependency, scripts |
 
 ## Architecture

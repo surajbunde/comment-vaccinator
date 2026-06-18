@@ -77,7 +77,15 @@ npm test
 
 128 tests covering all matchers, pipeline logic, word count edge cases, and custom pattern validation.
 
-### 3. Load Unpacked in Chrome
+### 3. Validate Manifests
+
+```bash
+npm run validate
+```
+
+Checks both manifests for Chrome MV3 and Firefox MV2 compatibility. Runs automatically before every build — blocks build on errors.
+
+### 4. Load Unpacked in Chrome
 
 1. Open `chrome://extensions`
 2. Enable **Developer mode**
