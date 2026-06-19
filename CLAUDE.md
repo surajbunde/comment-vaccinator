@@ -99,6 +99,8 @@ npm test
 5. **Custom patterns** — user-defined regex (only if `customPatternsEnabled` is true, independent of date filter)
 6. **Word count** — min/max threshold (only if `wordCountMode !== "off"`)
 
+Note: Per-video disabled check happens before the pipeline in `processThread()`.
+
 ## Branch Naming Convention
 
 Format: `{version}-{type}-{brief-description}`

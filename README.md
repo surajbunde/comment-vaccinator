@@ -27,6 +27,7 @@ Hide repetitive YouTube comments that contain date-like phrases, while preservin
 - Custom regex patterns: 10 preset spam patterns + add/edit/delete your own (with `i` flag).
 - Custom patterns toggle: disabled by default — presets ship inactive until you enable them.
 - Reset to defaults: one-click reset restores all 10 presets.
+- Per-video toggle: pause all filtering for the current video.
 - Live re-filtering when YouTube loads more comments.
 - Popup stats: total, hidden, visible comments (list + chart view).
 
@@ -123,8 +124,11 @@ Use at least 3-5 videos with active comments and validate:
 8. Custom patterns: enable toggle, verify preset patterns hide matching comments.
 9. Custom patterns: add/edit/delete patterns, verify changes take effect immediately.
 10. Custom patterns: "Reset to defaults" restores all 10 presets.
-11. Toggling popup controls triggers live re-filtering.
-12. Page navigation within YouTube still preserves behavior.
+11. Per-video toggle: pause filtering on current video, verify all comments reappear.
+12. Per-video toggle: navigate to different video, verify toggle state updates correctly.
+13. Per-video toggle: toggle persists after closing and reopening popup.
+14. Toggling popup controls triggers live re-filtering.
+15. Page navigation within YouTube still preserves behavior.
 
 ## Release Readiness Checklist
 
