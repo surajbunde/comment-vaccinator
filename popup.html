@@ -480,7 +480,7 @@
     </div>
   </div>
 
-  <div class="setting-group">
+  <div class="setting-group" style="border-color:#e74c3c;background:linear-gradient(130deg, rgba(231,76,60,0.06), rgba(231,76,60,0.01));">
     <div class="flex-row">
         <label for="keywordEnabled">Enable Keyword Blacklist:</label>
         <label class="switch">
@@ -489,7 +489,22 @@
         </label>
     </div>
     <label for="keywordList">Blacklist Keywords (comma-separated):</label>
-    <textarea id="keywordList" placeholder="e.g., ad, sponsor, first, subscribe"></textarea>
+    <textarea id="keywordList" placeholder="e.g., ad, sponsor, first, subscribe" style="border-left:3px solid #e74c3c;"></textarea>
+  </div>
+
+  <div class="setting-group" style="border-color:#27ae60;background:linear-gradient(130deg, rgba(39,174,96,0.08), rgba(39,174,96,0.02));">
+    <div class="flex-row">
+        <label for="whitelistEnabled" title="Whitelist overrides all other filters — matching comments always stay visible.">Enable Keyword Whitelist:</label>
+        <label class="switch">
+            <input type="checkbox" id="whitelistEnabled">
+            <span class="slider"></span>
+        </label>
+    </div>
+    <label for="whitelist">Whitelist Keywords (comma-separated):</label>
+    <textarea id="whitelist" placeholder="e.g., breakdown, analysis, tutorial" style="border-left:3px solid #27ae60;"></textarea>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px;">
+      Matching comments are never hidden, even if they match other filters.
+    </div>
   </div>
 
   <div class="setting-group" id="per-video-section">

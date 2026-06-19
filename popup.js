@@ -18,6 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const patternEditorBody = document.getElementById("patternEditorBody");
   const perVideoToggle = document.getElementById("perVideoToggle");
   const perVideoId = document.getElementById("perVideoId");
+  const whitelistEnabled = document.getElementById("whitelistEnabled");
+  const whitelist = document.getElementById("whitelist");
   const statsListBtn = document.getElementById("statsListBtn");
   const statsChartBtn = document.getElementById("statsChartBtn");
   const summaryList = document.getElementById("summaryList");
@@ -39,6 +41,8 @@ document.addEventListener("DOMContentLoaded", () => {
       "cv_keywordEnabled",
       "cv_emojiOnlyEnabled",
       "cv_customPatternsEnabled",
+      "cv_whitelistEnabled",
+      "cv_whitelist",
     ],
     (data) => {
       dateFilterEnabled.checked = data.cv_dateFilterEnabled !== undefined ? data.cv_dateFilterEnabled : true;
@@ -53,6 +57,9 @@ document.addEventListener("DOMContentLoaded", () => {
       keywordEnabled.checked = data.cv_keywordEnabled !== undefined ? data.cv_keywordEnabled : false;
       keywordList.value = data.cv_blacklist || "";
 
+      whitelistEnabled.checked = data.cv_whitelistEnabled !== undefined ? data.cv_whitelistEnabled : false;
+      whitelist.value = data.cv_whitelist || "";
+
       customPatternsEnabled.checked = data.cv_customPatternsEnabled !== undefined ? data.cv_customPatternsEnabled : false;
       patternEditorBody.style.display = customPatternsEnabled.checked ? "block" : "none";
 
@@ -60,6 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
       wordCountControls.style.display = wordCountEnabled.checked ? "block" : "none";
       emojiFilterEnabled.disabled = !wordCountEnabled.checked;
       keywordList.disabled = !keywordEnabled.checked;
+      whitelist.disabled = !whitelistEnabled.checked;
 
       wordCountValue.min = 3;
       wordCountValue.max = 50;
@@ -103,6 +111,8 @@ document.addEventListener("DOMContentLoaded", () => {
         cv_keywordEnabled: keywordEnabled.checked,
         cv_blacklist: keywordList.value.trim(),
         cv_customPatternsEnabled: customPatternsEnabled.checked,
+        cv_whitelistEnabled: whitelistEnabled.checked,
+        cv_whitelist: whitelist.value.trim(),
       },
       () => {
         // Notify content script to re-filter immediately.
@@ -132,6 +142,14 @@ document.addEventListener("DOMContentLoaded", () => {
   keywordList.addEventListener("blur", saveSettings);
   emojiFilterEnabled.addEventListener("change", saveSettings);
   emojiOnlyEnabled.addEventListener("change", saveSettings);
+
+  // Whitelist toggle and input
+  whitelistEnabled.addEventListener("change", () => {
+    whitelist.disabled = !whitelistEnabled.checked;
+    saveSettings();
+  });
+  whitelist.addEventListener("change", saveSettings);
+  whitelist.addEventListener("blur", saveSettings);
 
   // --- Per-video toggle ---
   perVideoToggle.addEventListener("change", () => {

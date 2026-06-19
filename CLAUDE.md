@@ -205,5 +205,6 @@ Popup opens as a full-screen overlay. CSS uses `@media (max-width: 480px)` break
 | Word Count | `wordCountMode` + `wordCountValue` | Hides comments with too few/many words |
 | Strip Emojis | `stripEmoji` | Modifier for word count — strips emojis before counting |
 | Keyword Blacklist | `keywordEnabled` + `blacklist` | Hides comments matching comma-separated keywords |
+| Keyword Whitelist | `whitelistEnabled` + `whitelist` | Overrides all other filters — matching comments always stay visible |
 | Emoji-Only | `emojiOnlyEnabled` | Hides comments containing ONLY emoji characters |
 | Custom Patterns | `customPatternsEnabled` + `customPatterns` | User-defined regex patterns (10 presets + custom) |
