@@ -492,6 +492,19 @@
     <textarea id="keywordList" placeholder="e.g., ad, sponsor, first, subscribe"></textarea>
   </div>
 
+  <div class="setting-group" id="per-video-section">
+    <div class="flex-row">
+        <label for="perVideoToggle" title="Pause all filtering for the current video. Comments will be shown regardless of filter settings.">Pause Filtering on This Video:</label>
+        <label class="switch">
+            <input type="checkbox" id="perVideoToggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px;">
+      <span id="perVideoId">No video detected</span>
+    </div>
+  </div>
+
   <details id="pattern-editor-section" class="setting-group">
     <summary style="cursor:pointer;font-weight:600;font-size:13px;">Advanced: Custom Patterns</summary>
     <div class="flex-row" style="margin-top:8px;">

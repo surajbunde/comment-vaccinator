@@ -16,6 +16,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const keywordList = document.getElementById("keywordList");
   const customPatternsEnabled = document.getElementById("customPatternsEnabled");
   const patternEditorBody = document.getElementById("patternEditorBody");
+  const perVideoToggle = document.getElementById("perVideoToggle");
+  const perVideoId = document.getElementById("perVideoId");
   const statsListBtn = document.getElementById("statsListBtn");
   const statsChartBtn = document.getElementById("statsChartBtn");
   const summaryList = document.getElementById("summaryList");
@@ -63,6 +65,17 @@ document.addEventListener("DOMContentLoaded", () => {
       wordCountValue.max = 50;
     }
   );
+
+  // --- Load per-video toggle state ---
+  chrome.storage.local.get(["cv_currentVideoId", "cv_perVideoDisabled"], (data) => {
+    const videoId = data.cv_currentVideoId || "";
+    const disabled = JSON.parse(data.cv_perVideoDisabled || "[]");
+    const isDisabled = videoId && disabled.includes(videoId);
+
+    perVideoToggle.checked = isDisabled;
+    perVideoId.textContent = videoId ? `Video: ${videoId}` : "No video detected";
+    perVideoToggle.disabled = !videoId;
+  });
 
   // --- B. Save settings on change ---
   function saveSettings() {
@@ -119,6 +132,33 @@ document.addEventListener("DOMContentLoaded", () => {
   keywordList.addEventListener("blur", saveSettings);
   emojiFilterEnabled.addEventListener("change", saveSettings);
   emojiOnlyEnabled.addEventListener("change", saveSettings);
+
+  // --- Per-video toggle ---
+  perVideoToggle.addEventListener("change", () => {
+    chrome.storage.local.get(["cv_currentVideoId", "cv_perVideoDisabled"], (data) => {
+      const videoId = data.cv_currentVideoId || "";
+      if (!videoId) return;
+
+      const disabled = JSON.parse(data.cv_perVideoDisabled || "[]");
+      let updated;
+
+      if (perVideoToggle.checked) {
+        updated = [...new Set([...disabled, videoId])].slice(-50);
+      } else {
+        updated = disabled.filter((id) => id !== videoId);
+      }
+
+      chrome.storage.local.set({ cv_perVideoDisabled: JSON.stringify(updated) }, () => {
+        chrome.tabs.query({ url: "*://*.youtube.com/*" }, (tabs) => {
+          tabs.forEach((tab) => {
+            chrome.tabs.sendMessage(tab.id, { type: "REFILTER_NOW" }, () => {
+              if (chrome.runtime.lastError) {}
+            });
+          });
+        });
+      });
+    });
+  });
 
   // --- C. Get counts from Content Script (batched DOM reads) ---
   let _stats = { total: 0, hidden: 0, visible: 0 };
