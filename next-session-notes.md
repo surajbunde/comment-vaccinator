@@ -5,28 +5,36 @@
 - Phase 2 (Per-Video Toggle) — Done, PR ready at v1.3.2-phase-2-per-video-toggle
 - Phase 3 (Keyword Whitelist) — Done, PR ready at v1.3.3-phase-3-keyword-whitelist
 
-## Next Tasks (Phase 3 UI Improvements)
+## Finalized Decisions
 
-### Collapsing Sections for Blacklist & Whitelist
-1. Make blacklist and whitelist sections collapsible (`<details>` elements)
-2. Remove "Enable Keyword" text from labels — toggles already serve this purpose
-3. Collapsed state should show visual indicator of enabled/disabled:
-   - **Blacklist collapsed**: red-tinted if enabled, grey if disabled
-   - **Whitelist collapsed**: green-tinted if enabled, grey if disabled
-4. Show minimal preview data in collapsed state (recent keywords first):
-   - Example: "ad, sponsor, first..." or "breakdown, analysis..."
-   - Show first 2-3 keywords, truncate with "..." if more
+### 1. Hybrid Collapse for Blacklist & Whitelist
+- Use `<details>` + `<summary>` elements (like Custom Patterns section)
+- **Auto-open when enabled, auto-close when disabled** (via JS on toggle change)
+- Collapsed state shows preview: first 2-3 keywords with "..." truncation
+  - Example: "ad, sponsor, first..."
+  - Example: "breakdown, analysis..."
+- Collapsed color states:
+  - Blacklist: `#e74c3c` tinted if enabled, grey if disabled
+  - Whitelist: `#27ae60` tinted if enabled, grey if disabled
+- Expanded state keeps existing red/green border styling
 
-### Implementation Notes
-- Use `<details>` + `<summary>` for collapsible behavior (no JS needed)
-- Add CSS for color states based on toggle state
-- Preview text should update dynamically when keywords change
-- Keep existing green/red border styling for expanded state
+### 2. Remove "Enable" from Filter Labels
+- Remove "Enable" from all filter labels
+- Keep "Hide Emoji-Only Comments:" as-is (describes behavior, not feature name)
+
+| Current Label | New Label |
+|---------------|-----------|
+| Enable Date Filter: | Date Filter: |
+| Enable Word Count Filter: | Word Count Filter: |
+| Hide Emoji-Only Comments: | Hide Emoji-Only Comments: (unchanged) |
+| Enable Keyword Blacklist: | Blacklist: |
+| Enable Keyword Whitelist: | Whitelist: |
+| Enable Custom Patterns: | Custom Patterns: |
 
 ## Files to Modify
-- `popup.html` — Convert blacklist/whitelist sections to `<details>` elements
-- `popup.js` — Add preview text update logic
-- `popup.css` (inline styles) — Add collapsed state color classes
+- `popup.html` — Convert blacklist/whitelist to `<details>`, update labels
+- `popup.js` — Add auto-open/close on toggle, preview text update logic
+- `popup.html` (inline styles) — Add collapsed state color classes
 
 ## Current Version
 - Branch: v1.3.3-phase-3-keyword-whitelist
