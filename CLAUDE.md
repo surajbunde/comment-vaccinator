@@ -8,8 +8,8 @@ Browser extension that filters YouTube comments by date mentions, keyword blackl
 npm run build
 ```
 Outputs to `build/`:
-- `comment-vaccinator-chrome-v1.3.1.zip`
-- `comment-vaccinator-firefox-v1.3.1.zip`
+- `comment-vaccinator-chrome-v1.3.5.zip`
+- `comment-vaccinator-firefox-v1.3.5.zip`
 - `chrome-unpacked/` (for "Load unpacked" testing)
 
 Build runs `validate.cjs` automatically — blocks on manifest errors.
@@ -27,7 +27,7 @@ Pre-build manifest validation checks:
 ```bash
 npm test
 ```
-128 tests covering all matchers, pipeline logic, word count edge cases, and custom pattern validation.
+138 tests covering all matchers, pipeline logic, word count edge cases, custom pattern validation, and export/import settings.
 
 ## Key Files
 

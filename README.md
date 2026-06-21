@@ -28,6 +28,7 @@ Hide repetitive YouTube comments that contain date-like phrases, while preservin
 - Custom patterns toggle: disabled by default — presets ship inactive until you enable them.
 - Reset to defaults: one-click reset restores all 10 presets.
 - Per-video toggle: pause all filtering for the current video.
+- Export/Import settings: one-click export to JSON file, import from JSON to restore or share configurations.
 - Live re-filtering when YouTube loads more comments.
 - Popup stats: total, hidden, visible comments (list + chart view).
 
@@ -37,7 +38,7 @@ Hide repetitive YouTube comments that contain date-like phrases, while preservin
 - ES modules in `src/` bundled via esbuild to single `content.js`
 - Popup UI (`popup.html`, `popup.js`)
 - Local storage for settings (`chrome.storage.local`, `cv_` namespace)
-- `node:test` test harness (128 tests)
+- `node:test` test harness (138 tests)
 
 ## Project Structure
 
@@ -66,8 +67,8 @@ npm run build
 ```
 
 Outputs to `build/`:
-- `comment-vaccinator-chrome-v1.3.1.zip`
-- `comment-vaccinator-firefox-v1.3.1.zip`
+- `comment-vaccinator-chrome-v1.3.5.zip`
+- `comment-vaccinator-firefox-v1.3.5.zip`
 - `chrome-unpacked/` (for "Load unpacked" testing)
 
 ### 2. Run Tests
@@ -76,7 +77,7 @@ Outputs to `build/`:
 npm test
 ```
 
-128 tests covering all matchers, pipeline logic, word count edge cases, and custom pattern validation.
+138 tests covering all matchers, pipeline logic, word count edge cases, custom pattern validation, and export/import settings.
 
 ### 3. Validate Manifests
 
