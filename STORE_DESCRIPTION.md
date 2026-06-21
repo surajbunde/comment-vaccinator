@@ -40,6 +40,39 @@ Block comments containing specific words:
 - Comma-separated list (e.g., `ad, sponsor, first, subscribe`)
 - Works independently of date filter
 - Case-insensitive matching
+- Red border, red-tinted background when enabled
+
+### 🛡️ Keyword Whitelist
+
+Protect comments containing specific words:
+- Comma-separated list — matching comments always stay visible
+- **Overrides all other filters** — whitelist always wins
+- Green border, green-tinted background when enabled
+
+### 😶 Emoji-Only Filter
+
+Hides comments containing ONLY emoji characters.
+
+### 🔧 Custom Patterns
+
+10 preset regex patterns for common spam + add your own:
+- Presets ship inactive until you enable the toggle
+- Add/edit/delete custom patterns via regex editor
+- Reset to defaults restores the 10 OOTB presets (your custom patterns are kept)
+
+### 🎬 Per-Video Toggle
+
+Pause all filtering on the current video:
+- Toggle in the popup pauses/resumes filtering for that video
+- Works across playlists and video navigation
+- Remembers disabled videos (up to 50)
+
+### 📤 Export / Import Settings
+
+One-click export to JSON, import to restore or share configurations:
+- Exports all filter settings, custom patterns, and toggle states
+- Validates JSON on import with schema version check
+- Imports with confirmation before overwriting
 
 ### 📊 Comment Stats
 

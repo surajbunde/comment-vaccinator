@@ -26,7 +26,7 @@ Hide repetitive YouTube comments that contain date-like phrases, while preservin
 - Keyword whitelist: green border, green-tinted background. Overrides all other filters — matching comments always stay visible.
 - Custom regex patterns: 10 preset spam patterns + add/edit/delete your own (with `i` flag).
 - Custom patterns toggle: disabled by default — presets ship inactive until you enable them.
-- Reset to defaults: one-click reset restores all 10 presets.
+- Reset to defaults: resets the 10 OOTB presets to original values, keeps your custom patterns.
 - Per-video toggle: pause all filtering for the current video.
 - Export/Import settings: one-click export to JSON file, import from JSON to restore or share configurations.
 - Live re-filtering when YouTube loads more comments.
@@ -124,7 +124,7 @@ Use at least 3-5 videos with active comments and validate:
 7. Keyword whitelist overrides all other filters — matching comments always visible.
 8. Custom patterns: enable toggle, verify preset patterns hide matching comments.
 9. Custom patterns: add/edit/delete patterns, verify changes take effect immediately.
-10. Custom patterns: "Reset to defaults" restores all 10 presets.
+10. Custom patterns: "Reset to defaults" restores 10 presets, keeps custom patterns.
 11. Per-video toggle: pause filtering on current video, verify all comments reappear.
 12. Per-video toggle: navigate to different video, verify toggle state updates correctly.
 13. Per-video toggle: toggle persists after closing and reopening popup.
