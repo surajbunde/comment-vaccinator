@@ -26,8 +26,9 @@ Hide repetitive YouTube comments that contain date-like phrases, while preservin
 - Keyword whitelist: green border, green-tinted background. Overrides all other filters — matching comments always stay visible.
 - Custom regex patterns: 10 preset spam patterns + add/edit/delete your own (with `i` flag).
 - Custom patterns toggle: disabled by default — presets ship inactive until you enable them.
-- Reset to defaults: one-click reset restores all 10 presets.
+- Reset to defaults: resets the 10 OOTB presets to original values, keeps your custom patterns.
 - Per-video toggle: pause all filtering for the current video.
+- Export/Import settings: one-click export to JSON file, import from JSON to restore or share configurations.
 - Live re-filtering when YouTube loads more comments.
 - Popup stats: total, hidden, visible comments (list + chart view).
 
@@ -37,7 +38,7 @@ Hide repetitive YouTube comments that contain date-like phrases, while preservin
 - ES modules in `src/` bundled via esbuild to single `content.js`
 - Popup UI (`popup.html`, `popup.js`)
 - Local storage for settings (`chrome.storage.local`, `cv_` namespace)
-- `node:test` test harness (128 tests)
+- `node:test` test harness (138 tests)
 
 ## Project Structure
 
@@ -66,8 +67,8 @@ npm run build
 ```
 
 Outputs to `build/`:
-- `comment-vaccinator-chrome-v1.3.1.zip`
-- `comment-vaccinator-firefox-v1.3.1.zip`
+- `comment-vaccinator-chrome-v1.3.5.zip`
+- `comment-vaccinator-firefox-v1.3.5.zip`
 - `chrome-unpacked/` (for "Load unpacked" testing)
 
 ### 2. Run Tests
@@ -76,7 +77,7 @@ Outputs to `build/`:
 npm test
 ```
 
-128 tests covering all matchers, pipeline logic, word count edge cases, and custom pattern validation.
+138 tests covering all matchers, pipeline logic, word count edge cases, custom pattern validation, and export/import settings.
 
 ### 3. Validate Manifests
 
@@ -123,7 +124,7 @@ Use at least 3-5 videos with active comments and validate:
 7. Keyword whitelist overrides all other filters — matching comments always visible.
 8. Custom patterns: enable toggle, verify preset patterns hide matching comments.
 9. Custom patterns: add/edit/delete patterns, verify changes take effect immediately.
-10. Custom patterns: "Reset to defaults" restores all 10 presets.
+10. Custom patterns: "Reset to defaults" restores 10 presets, keeps custom patterns.
 11. Per-video toggle: pause filtering on current video, verify all comments reappear.
 12. Per-video toggle: navigate to different video, verify toggle state updates correctly.
 13. Per-video toggle: toggle persists after closing and reopening popup.

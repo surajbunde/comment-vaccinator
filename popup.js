@@ -548,8 +548,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const patternResetBtn = document.getElementById("pattern-reset-btn");
   patternResetBtn.addEventListener("click", () => {
-    if (!confirm("Reset all custom patterns to the 10 default presets? This cannot be undone.")) return;
-    customPatterns = PRESET_PATTERNS.map((p) => ({ ...p }));
+    if (!confirm("Reset the 10 default presets to original values? Your custom patterns will be kept.")) return;
+    const presetNames = new Set(PRESET_PATTERNS.map((p) => p.name));
+    // Keep user-added patterns (not in presets)
+    const userPatterns = customPatterns.filter((p) => !presetNames.has(p.name));
+    // Reset presets to original values
+    const resetPresets = PRESET_PATTERNS.map((p) => ({ ...p }));
+    customPatterns = [...resetPresets, ...userPatterns];
     saveCustomPatterns();
     renderPatternList();
   });
@@ -576,5 +581,127 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     renderPatternList();
+  });
+
+  // --- E. Export / Import Settings ---
+  const exportBtn = document.getElementById("export-btn");
+  const importFile = document.getElementById("import-file");
+  const importStatus = document.getElementById("import-status");
+
+  const EXPORT_KEYS = [
+    "cv_dateFilterEnabled",
+    "cv_wordCountMode",
+    "cv_wordCountValue",
+    "cv_stripEmoji",
+    "cv_keywordEnabled",
+    "cv_blacklist",
+    "cv_whitelist",
+    "cv_emojiOnlyEnabled",
+    "cv_customPatternsEnabled",
+    "cv_customPatterns",
+    // Note: cv_perVideoDisabled and cv_currentVideoId are intentionally excluded —
+    // they are device/session context, not shareable config.
+  ];
+
+  const ALLOWED_KEYS = new Set(EXPORT_KEYS);
+
+  function showImportStatus(message, isError) {
+    importStatus.textContent = message;
+    importStatus.style.color = isError ? "#e74c3c" : "#27ae60";
+    setTimeout(() => {
+      importStatus.textContent = "";
+    }, 4000);
+  }
+
+  exportBtn.addEventListener("click", async () => {
+    try {
+      const raw = await chrome.storage.local.get(EXPORT_KEYS);
+
+      const exportPayload = {
+        _meta: {
+          exportedAt: new Date().toISOString(),
+          extensionVersion: chrome.runtime.getManifest().version,
+          schema: 1,
+        },
+        settings: raw,
+      };
+
+      const blob = new Blob([JSON.stringify(exportPayload, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `comment-vaccinator-config-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      showImportStatus("Settings exported!", false);
+    } catch (e) {
+      showImportStatus("Export failed: " + e.message, true);
+    }
+  });
+
+  importFile.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const text = await file.text();
+    let payload;
+
+    try {
+      payload = JSON.parse(text);
+    } catch (_) {
+      showImportStatus("Invalid JSON file.", true);
+      importFile.value = "";
+      return;
+    }
+
+    // Schema validation.
+    if (!payload._meta || !payload.settings || payload._meta.schema !== 1) {
+      showImportStatus("Unrecognised config format. Is this a Comment Vaccinator export?", true);
+      importFile.value = "";
+      return;
+    }
+
+    // Validate each setting key — only accept known cv_ keys.
+    const safeSettings = {};
+    for (const [key, value] of Object.entries(payload.settings)) {
+      if (ALLOWED_KEYS.has(key)) {
+        safeSettings[key] = value;
+      }
+    }
+
+    if (Object.keys(safeSettings).length === 0) {
+      showImportStatus("No valid settings found in file.", true);
+      importFile.value = "";
+      return;
+    }
+
+    // Validate cv_customPatterns if present — each entry must have valid regex.
+    if (safeSettings.cv_customPatterns) {
+      try {
+        const patterns = JSON.parse(safeSettings.cv_customPatterns);
+        for (const p of patterns) {
+          new RegExp(p.patternSource, p.flags || ""); // will throw if invalid
+        }
+      } catch (e) {
+        showImportStatus(`Invalid custom patterns in file: ${e.message}`, true);
+        importFile.value = "";
+        return;
+      }
+    }
+
+    // Confirm before overwriting.
+    if (!confirm("This will overwrite your current settings. Continue?")) {
+      importFile.value = "";
+      return;
+    }
+
+    await chrome.storage.local.set(safeSettings);
+    showImportStatus(`Imported ${Object.keys(safeSettings).length} settings.`, false);
+
+    // Reload popup UI to reflect imported values.
+    window.location.reload();
   });
 });

@@ -1,15 +1,15 @@
 # Comment Vaccinator – YouTube Comment Filter
 
 ## Overview
-Browser extension that filters YouTube comments by date mentions, keyword blacklist, word count thresholds, and emoji-only content. Supports Chrome (MV3) and Firefox (MV2 + Firefox Android).
+Browser extension that filters YouTube comments by date mentions, keyword blacklist/whitelist, word count thresholds, emoji-only content, and custom regex patterns. Per-video toggle, export/import settings, badge. Supports Chrome (MV3) and Firefox (MV2 + Firefox Android).
 
 ## Build
 ```bash
 npm run build
 ```
 Outputs to `build/`:
-- `comment-vaccinator-chrome-v1.3.1.zip`
-- `comment-vaccinator-firefox-v1.3.1.zip`
+- `comment-vaccinator-chrome-v1.3.5.zip`
+- `comment-vaccinator-firefox-v1.3.5.zip`
 - `chrome-unpacked/` (for "Load unpacked" testing)
 
 Build runs `validate.cjs` automatically — blocks on manifest errors.
@@ -27,7 +27,7 @@ Pre-build manifest validation checks:
 ```bash
 npm test
 ```
-128 tests covering all matchers, pipeline logic, word count edge cases, and custom pattern validation.
+138 tests covering all matchers, pipeline logic, word count edge cases, custom pattern validation, and export/import settings.
 
 ## Key Files
 
@@ -140,11 +140,7 @@ v1.4.2-chore-update-esbuild
 
 ## Known Issues
 
-### Phase 4: Badge not working on Firefox
-- **Symptom:** Extension icon badge shows hidden comment count on Chrome but not on Firefox
-- **Root cause:** `background.js` uses `chrome.action.setBadgeText()` which is MV3-only. Firefox MV2 uses `chrome.browserAction.setBadgeText()`.
-- **Fix needed:** Add browser detection and use `chrome.browserAction` for Firefox MV2 in `background.js`
-- **Status:** To be fixed in Phase 4
+(No open issues)
 
 ## Firefox Gotchas
 
