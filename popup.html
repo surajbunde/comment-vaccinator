@@ -628,6 +628,15 @@
     </div>
   </div>
 
+  <div class="setting-group" style="margin-top:8px;">
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button id="export-btn" style="flex:1;padding:8px;border:none;border-radius:6px;font-size:12px;cursor:pointer;color:#fff;background:linear-gradient(125deg,var(--accent-a),var(--accent-b));">Export Settings</button>
+      <label for="import-file" style="flex:1;padding:8px;border:none;border-radius:6px;font-size:12px;cursor:pointer;color:#fff;background:linear-gradient(125deg,var(--accent-b),var(--accent-c));text-align:center;">Import Settings</label>
+      <input type="file" id="import-file" accept=".json" style="display:none;" />
+    </div>
+    <div id="import-status" style="font-size:11px;margin-top:6px;text-align:center;"></div>
+  </div>
+
   <div class="donate-wrap">
     <span class="donate-text">Support this -inator</span>
     <span class="donate-upi">UPI: surajbunde@ybl</span>
