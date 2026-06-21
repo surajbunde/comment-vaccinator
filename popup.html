@@ -311,14 +311,19 @@
       border-color: var(--line);
       background: rgba(255,255,255,0.15);
     }
-    details.setting-group summary {
+    details.setting-group[data-color] summary {
       cursor: pointer;
       font-weight: 600;
       font-size: 13px;
       list-style: none;
     }
-    details.setting-group summary::-webkit-details-marker {
+    details.setting-group[data-color] summary::-webkit-details-marker {
       display: none;
+    }
+    details.setting-group summary {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
     }
     details.setting-group .preview-text {
       font-size: 11px;

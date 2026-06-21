@@ -90,8 +90,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   );
 
-  // Prevent manual toggle of details elements - only allow toggle via checkbox
-  document.querySelectorAll("details.setting-group").forEach((details) => {
+  // Prevent manual toggle of details elements with data-color - only allow toggle via checkbox
+  document.querySelectorAll("details.setting-group[data-color]").forEach((details) => {
     details.addEventListener("click", (e) => {
       if (!e.target.closest(".switch")) {
         e.preventDefault();
