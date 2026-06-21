@@ -155,6 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       section.open = false;
     }
+    updateSectionState("blacklist-section", "blacklistPreview", keywordEnabled.checked, keywordList.value);
     saveSettings();
   });
 
