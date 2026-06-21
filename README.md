@@ -182,6 +182,14 @@ Common tweaks:
 - Add custom regex patterns via the popup UI (Advanced: Custom Patterns section).
 - Edit `PRESET_PATTERNS` in `popup.js` to change default presets.
 
+## Support
+
+If you find Comment Vaccinator useful, consider supporting development:
+
+[💖 Support 💖](https://rzp.io/rzp/zyRfKQ0a)
+
+UPI: `surajbunde@ybl`
+
 ## License
 
 CC BY-NC-SA 4.0 — Free to use, modify, and share for non-commercial purposes.
