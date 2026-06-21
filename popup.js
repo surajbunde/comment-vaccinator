@@ -90,6 +90,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   );
 
+  // Prevent manual toggle of details elements - only allow toggle via checkbox
+  document.querySelectorAll("details.setting-group").forEach((details) => {
+    details.addEventListener("click", (e) => {
+      if (!e.target.closest(".switch")) {
+        e.preventDefault();
+      }
+    });
+  });
+
   // --- Load per-video toggle state ---
   chrome.storage.local.get(["cv_currentVideoId", "cv_perVideoDisabled"], (data) => {
     const videoId = data.cv_currentVideoId || "";
