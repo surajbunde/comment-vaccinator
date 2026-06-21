@@ -527,20 +527,23 @@
     </div>
   </details>
 
-  <div class="setting-group" style="border-color:#27ae60;background:linear-gradient(130deg, rgba(39,174,96,0.08), rgba(39,174,96,0.02));">
-    <div class="flex-row">
-        <label for="whitelistEnabled" title="Whitelist overrides all other filters — matching comments always stay visible.">Enable Keyword Whitelist:</label>
-        <label class="switch">
-            <input type="checkbox" id="whitelistEnabled">
-            <span class="slider"></span>
-        </label>
+  <details id="whitelist-section" class="setting-group" data-color="green" data-enabled="false" open>
+    <summary>
+      Whitelist:
+      <span class="preview-text" id="whitelistPreview"></span>
+      <label class="switch" style="float:right;" title="Whitelist overrides all other filters — matching comments always stay visible.">
+          <input type="checkbox" id="whitelistEnabled">
+          <span class="slider"></span>
+      </label>
+    </summary>
+    <div id="whitelistBody">
+      <label for="whitelist">Whitelist Keywords (comma-separated):</label>
+      <textarea id="whitelist" placeholder="e.g., breakdown, analysis, tutorial" style="border-left:3px solid #27ae60;"></textarea>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;">
+        Matching comments are never hidden, even if they match other filters.
+      </div>
     </div>
-    <label for="whitelist">Whitelist Keywords (comma-separated):</label>
-    <textarea id="whitelist" placeholder="e.g., breakdown, analysis, tutorial" style="border-left:3px solid #27ae60;"></textarea>
-    <div style="font-size:11px;color:var(--muted);margin-top:4px;">
-      Matching comments are never hidden, even if they match other filters.
-    </div>
-  </div>
+  </details>
 
   <div class="setting-group" id="per-video-section">
     <div class="flex-row">
