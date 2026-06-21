@@ -548,8 +548,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const patternResetBtn = document.getElementById("pattern-reset-btn");
   patternResetBtn.addEventListener("click", () => {
-    if (!confirm("Reset all custom patterns to the 10 default presets? This cannot be undone.")) return;
-    customPatterns = PRESET_PATTERNS.map((p) => ({ ...p }));
+    if (!confirm("Reset the 10 default presets to original values? Your custom patterns will be kept.")) return;
+    const presetNames = new Set(PRESET_PATTERNS.map((p) => p.name));
+    // Keep user-added patterns (not in presets)
+    const userPatterns = customPatterns.filter((p) => !presetNames.has(p.name));
+    // Reset presets to original values
+    const resetPresets = PRESET_PATTERNS.map((p) => ({ ...p }));
+    customPatterns = [...resetPresets, ...userPatterns];
     saveCustomPatterns();
     renderPatternList();
   });
