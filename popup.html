@@ -294,6 +294,43 @@
       font-weight: 700;
       color: var(--muted);
     }
+    /* Collapsed state color indicators */
+    details.setting-group[data-enabled="true"][data-color="red"] {
+      border-color: #e74c3c;
+      background: linear-gradient(130deg, rgba(231,76,60,0.06), rgba(231,76,60,0.01));
+    }
+    details.setting-group[data-enabled="false"][data-color="red"] {
+      border-color: var(--line);
+      background: rgba(255,255,255,0.15);
+    }
+    details.setting-group[data-enabled="true"][data-color="green"] {
+      border-color: #27ae60;
+      background: linear-gradient(130deg, rgba(39,174,96,0.08), rgba(39,174,96,0.02));
+    }
+    details.setting-group[data-enabled="false"][data-color="green"] {
+      border-color: var(--line);
+      background: rgba(255,255,255,0.15);
+    }
+    details.setting-group[data-color] summary {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      list-style: none;
+    }
+    details.setting-group[data-color] summary::-webkit-details-marker {
+      display: none;
+    }
+    details.setting-group summary {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    details.setting-group .preview-text {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: normal;
+      margin-left: 8px;
+    }
     .view-switch {
       display: inline-flex;
       border: 1px solid var(--line);
@@ -432,7 +469,7 @@
 
   <div class="setting-group">
     <div class="flex-row">
-        <label for="dateFilterEnabled">Enable Date Filter:</label>
+        <label for="dateFilterEnabled">Date Filter:</label>
         <label class="switch">
             <input type="checkbox" id="dateFilterEnabled">
             <span class="slider"></span>
@@ -442,7 +479,7 @@
 
   <div class="setting-group">
     <div class="flex-row">
-        <label for="wordCountEnabled">Enable Word Count Filter:</label>
+        <label for="wordCountEnabled">Word Count Filter:</label>
         <label class="switch">
             <input type="checkbox" id="wordCountEnabled">
             <span class="slider"></span>
@@ -480,17 +517,38 @@
     </div>
   </div>
 
-  <div class="setting-group">
-    <div class="flex-row">
-        <label for="keywordEnabled">Enable Keyword Blacklist:</label>
-        <label class="switch">
-            <input type="checkbox" id="keywordEnabled">
-            <span class="slider"></span>
-        </label>
+  <details id="blacklist-section" class="setting-group" data-color="red" data-enabled="false" open>
+    <summary>
+      Blacklist:
+      <span class="preview-text" id="blacklistPreview"></span>
+      <label class="switch" style="float:right;">
+          <input type="checkbox" id="keywordEnabled">
+          <span class="slider"></span>
+      </label>
+    </summary>
+    <div id="blacklistBody">
+      <label for="keywordList">Blacklist Keywords (comma-separated):</label>
+      <textarea id="keywordList" placeholder="e.g., ad, sponsor, first, subscribe" style="border-left:3px solid #e74c3c;"></textarea>
     </div>
-    <label for="keywordList">Blacklist Keywords (comma-separated):</label>
-    <textarea id="keywordList" placeholder="e.g., ad, sponsor, first, subscribe"></textarea>
-  </div>
+  </details>
+
+  <details id="whitelist-section" class="setting-group" data-color="green" data-enabled="false" open>
+    <summary>
+      Whitelist:
+      <span class="preview-text" id="whitelistPreview"></span>
+      <label class="switch" style="float:right;" title="Whitelist overrides all other filters — matching comments always stay visible.">
+          <input type="checkbox" id="whitelistEnabled">
+          <span class="slider"></span>
+      </label>
+    </summary>
+    <div id="whitelistBody">
+      <label for="whitelist">Whitelist Keywords (comma-separated):</label>
+      <textarea id="whitelist" placeholder="e.g., breakdown, analysis, tutorial" style="border-left:3px solid #27ae60;"></textarea>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;">
+        Matching comments are never hidden, even if they match other filters.
+      </div>
+    </div>
+  </details>
 
   <div class="setting-group" id="per-video-section">
     <div class="flex-row">
@@ -506,9 +564,9 @@
   </div>
 
   <details id="pattern-editor-section" class="setting-group">
-    <summary style="cursor:pointer;font-weight:600;font-size:13px;">Advanced: Custom Patterns</summary>
+    <summary>Advanced: Custom Patterns</summary>
     <div class="flex-row" style="margin-top:8px;">
-        <label for="customPatternsEnabled">Enable Custom Patterns:</label>
+        <label for="customPatternsEnabled">Custom Patterns:</label>
         <label class="switch">
             <input type="checkbox" id="customPatternsEnabled">
             <span class="slider"></span>

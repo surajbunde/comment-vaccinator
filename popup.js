@@ -18,6 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const patternEditorBody = document.getElementById("patternEditorBody");
   const perVideoToggle = document.getElementById("perVideoToggle");
   const perVideoId = document.getElementById("perVideoId");
+  const whitelistEnabled = document.getElementById("whitelistEnabled");
+  const whitelist = document.getElementById("whitelist");
   const statsListBtn = document.getElementById("statsListBtn");
   const statsChartBtn = document.getElementById("statsChartBtn");
   const summaryList = document.getElementById("summaryList");
@@ -39,6 +41,8 @@ document.addEventListener("DOMContentLoaded", () => {
       "cv_keywordEnabled",
       "cv_emojiOnlyEnabled",
       "cv_customPatternsEnabled",
+      "cv_whitelistEnabled",
+      "cv_whitelist",
     ],
     (data) => {
       dateFilterEnabled.checked = data.cv_dateFilterEnabled !== undefined ? data.cv_dateFilterEnabled : true;
@@ -53,6 +57,9 @@ document.addEventListener("DOMContentLoaded", () => {
       keywordEnabled.checked = data.cv_keywordEnabled !== undefined ? data.cv_keywordEnabled : false;
       keywordList.value = data.cv_blacklist || "";
 
+      whitelistEnabled.checked = data.cv_whitelistEnabled !== undefined ? data.cv_whitelistEnabled : false;
+      whitelist.value = data.cv_whitelist || "";
+
       customPatternsEnabled.checked = data.cv_customPatternsEnabled !== undefined ? data.cv_customPatternsEnabled : false;
       patternEditorBody.style.display = customPatternsEnabled.checked ? "block" : "none";
 
@@ -60,11 +67,37 @@ document.addEventListener("DOMContentLoaded", () => {
       wordCountControls.style.display = wordCountEnabled.checked ? "block" : "none";
       emojiFilterEnabled.disabled = !wordCountEnabled.checked;
       keywordList.disabled = !keywordEnabled.checked;
+      whitelist.disabled = !whitelistEnabled.checked;
 
       wordCountValue.min = 3;
       wordCountValue.max = 50;
+
+      // Initialize collapsed state and preview for blacklist
+      const blacklistSection = document.getElementById("blacklist-section");
+      blacklistSection.dataset.enabled = keywordEnabled.checked;
+      blacklistSection.open = keywordEnabled.checked;
+      if (!keywordEnabled.checked) {
+        document.getElementById("blacklistPreview").textContent = getKeywordPreview(keywordList.value);
+      }
+
+      // Initialize collapsed state and preview for whitelist
+      const whitelistSection = document.getElementById("whitelist-section");
+      whitelistSection.dataset.enabled = whitelistEnabled.checked;
+      whitelistSection.open = whitelistEnabled.checked;
+      if (!whitelistEnabled.checked) {
+        document.getElementById("whitelistPreview").textContent = getKeywordPreview(whitelist.value);
+      }
     }
   );
+
+  // Prevent manual toggle of details elements with data-color - only allow toggle via checkbox
+  document.querySelectorAll("details.setting-group[data-color]").forEach((details) => {
+    details.addEventListener("click", (e) => {
+      if (!e.target.closest(".switch")) {
+        e.preventDefault();
+      }
+    });
+  });
 
   // --- Load per-video toggle state ---
   chrome.storage.local.get(["cv_currentVideoId", "cv_perVideoDisabled"], (data) => {
@@ -103,6 +136,8 @@ document.addEventListener("DOMContentLoaded", () => {
         cv_keywordEnabled: keywordEnabled.checked,
         cv_blacklist: keywordList.value.trim(),
         cv_customPatternsEnabled: customPatternsEnabled.checked,
+        cv_whitelistEnabled: whitelistEnabled.checked,
+        cv_whitelist: whitelist.value.trim(),
       },
       () => {
         // Notify content script to re-filter immediately.
@@ -122,16 +157,52 @@ document.addEventListener("DOMContentLoaded", () => {
   wordCountEnabled.addEventListener("change", saveSettings);
   wordCountMode.addEventListener("change", saveSettings);
   wordCountValue.addEventListener("change", saveSettings);
-  keywordEnabled.addEventListener("change", saveSettings);
+  keywordEnabled.addEventListener("change", () => {
+    const section = document.getElementById("blacklist-section");
+    if (keywordEnabled.checked) {
+      section.open = true;
+    } else {
+      section.open = false;
+    }
+    updateSectionState("blacklist-section", "blacklistPreview", keywordEnabled.checked, keywordList.value);
+    saveSettings();
+  });
 
   customPatternsEnabled.addEventListener("change", () => {
     patternEditorBody.style.display = customPatternsEnabled.checked ? "block" : "none";
     saveSettings();
   });
-  keywordList.addEventListener("change", saveSettings);
-  keywordList.addEventListener("blur", saveSettings);
+  keywordList.addEventListener("change", () => {
+    updateSectionState("blacklist-section", "blacklistPreview", keywordEnabled.checked, keywordList.value);
+    saveSettings();
+  });
+  keywordList.addEventListener("blur", () => {
+    updateSectionState("blacklist-section", "blacklistPreview", keywordEnabled.checked, keywordList.value);
+    saveSettings();
+  });
   emojiFilterEnabled.addEventListener("change", saveSettings);
   emojiOnlyEnabled.addEventListener("change", saveSettings);
+
+  // Whitelist toggle and input
+  whitelistEnabled.addEventListener("change", () => {
+    whitelist.disabled = !whitelistEnabled.checked;
+    const section = document.getElementById("whitelist-section");
+    if (whitelistEnabled.checked) {
+      section.open = true;
+    } else {
+      section.open = false;
+    }
+    updateSectionState("whitelist-section", "whitelistPreview", whitelistEnabled.checked, whitelist.value);
+    saveSettings();
+  });
+  whitelist.addEventListener("change", () => {
+    updateSectionState("whitelist-section", "whitelistPreview", whitelistEnabled.checked, whitelist.value);
+    saveSettings();
+  });
+  whitelist.addEventListener("blur", () => {
+    updateSectionState("whitelist-section", "whitelistPreview", whitelistEnabled.checked, whitelist.value);
+    saveSettings();
+  });
 
   // --- Per-video toggle ---
   perVideoToggle.addEventListener("change", () => {
@@ -225,6 +296,36 @@ document.addEventListener("DOMContentLoaded", () => {
   statsListBtn.addEventListener("click", () => setStatsView("list"));
   statsChartBtn.addEventListener("click", () => setStatsView("chart"));
   setStatsView("list");
+
+  /**
+   * Generates preview text from comma-separated keywords.
+   * Shows first 2-3 keywords, truncated with "..." if more.
+   * @param {string} value - Comma-separated keyword string
+   * @returns {string} Preview text
+   */
+  function getKeywordPreview(value) {
+    if (!value || !value.trim()) return "";
+    const keywords = value.split(",").map(k => k.trim()).filter(k => k);
+    if (keywords.length === 0) return "";
+    const preview = keywords.slice(0, 3).join(", ");
+    return keywords.length > 3 ? preview + "..." : preview;
+  }
+
+  /**
+   * Updates collapsed state colors and preview text for a details section.
+   * @param {string} sectionId - The details element ID
+   * @param {string} previewId - The preview span element ID
+   * @param {boolean} enabled - Whether the toggle is on
+   * @param {string} value - The textarea value
+   */
+  function updateSectionState(sectionId, previewId, enabled, value) {
+    const section = document.getElementById(sectionId);
+    const preview = document.getElementById(previewId);
+    if (!section || !preview) return;
+
+    section.dataset.enabled = enabled;
+    preview.textContent = enabled ? "" : getKeywordPreview(value);
+  }
 
   let countsPollingTimer = null;
 

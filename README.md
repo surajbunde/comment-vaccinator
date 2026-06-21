@@ -22,8 +22,8 @@ Hide repetitive YouTube comments that contain date-like phrases, while preservin
   - `min`: hide if comment has more words than threshold.
 - Optional strict emoji cleanup before word counting.
 - Emoji-only filter: hides comments containing ONLY emoji characters.
-- Keyword blacklist (comma-separated).
-- Keyword whitelist: overrides all other filters — matching comments always stay visible.
+- Keyword blacklist (comma-separated): red border, red-tinted background.
+- Keyword whitelist: green border, green-tinted background. Overrides all other filters — matching comments always stay visible.
 - Custom regex patterns: 10 preset spam patterns + add/edit/delete your own (with `i` flag).
 - Custom patterns toggle: disabled by default — presets ship inactive until you enable them.
 - Reset to defaults: one-click reset restores all 10 presets.
