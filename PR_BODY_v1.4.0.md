@@ -41,6 +41,21 @@ Verified against the built packages in both browsers:
 | Chrome (MV3) export | 8 settings | 8 settings, 1567 bytes |
 | Chrome (MV3) import | writes the value | writes the value |
 
+## Browser End-to-End Tests
+
+This branch also adds **browser end-to-end suites** so anyone (and CI) can verify the extension in a real browser without installing a test framework:
+
+| Suite | Browser | Protocol | Command |
+|---|---|---|---|
+| `tests/e2e/chrome-extension.test.mjs` | Chrome / Edge / Brave | DevTools Protocol | `npm run test:e2e:chrome` |
+| `tests/e2e/firefox-extension.test.mjs` | Firefox | Marionette | `npm run test:e2e:firefox` |
+
+They are **dependency-free** (Node's built-in `WebSocket` and `net`), need only the browser itself, and never touch the real `www.youtube.com` — a local HTTP server serves a page that mimics the YouTube comment markup, and the extension under test is a copy of the real build whose manifest additionally matches `http://localhost/*`. The shipped manifest is never modified.
+
+`build.cjs` now also writes `build/firefox-unpacked`, mirroring `chrome-unpacked`, so the Firefox build can be loaded unpacked (about:debugging → Load Temporary Add-on) as well as tested.
+
+Both suites pass 12/12 from a clean checkout after `rm -rf build` (the extension is rebuilt automatically).
+
 ## Files Changed
 
 | File | Description |
