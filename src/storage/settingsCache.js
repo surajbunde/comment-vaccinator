@@ -19,6 +19,12 @@
 import { parseKeywordList } from "../matchers/keywords.js";
 import { DEFAULT_SPAM_SETTINGS } from "../matchers/spamFilters.js";
 
+// NOTE: The promise form of chrome.storage.* works in a Firefox content
+// script, but NOT in a Firefox extension page (the popup) — there
+// chrome.storage.local.get() returns undefined instead of a Promise.
+// The popup therefore uses the callback form via its own storageGet() /
+// storageSet() helpers. Do not "simplify" these calls into the other style.
+
 /**
  * @typedef {Object} Settings
  * @property {boolean}  dateFilterEnabled

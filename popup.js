@@ -4,6 +4,34 @@
  * Uses cv_ prefixed storage keys.
  */
 
+/**
+ * Reads from extension storage.
+ *
+ * Firefox's `chrome.*` namespace in an extension page is callback-only:
+ * `chrome.storage.local.get(keys)` returns undefined instead of a Promise,
+ * so `await` on it silently resolves to undefined and an exported config
+ * ends up with no settings at all. The callback form is supported by both
+ * Chrome and Firefox, so it is used everywhere in the popup.
+ *
+ * Declared at the top level (not inside the DOMContentLoaded handler) so it
+ * can be unit tested directly.
+ *
+ * @param {string|string[]} keys - Storage keys to read.
+ * @returns {Promise<Object>} The stored values.
+ */
+function storageGet(keys) {
+  return new Promise((resolve) => chrome.storage.local.get(keys, resolve));
+}
+
+/**
+ * Writes to extension storage.
+ * @param {Object} items - Key/value pairs to store.
+ * @returns {Promise<void>} Resolves once the write completes.
+ */
+function storageSet(items) {
+  return new Promise((resolve) => chrome.storage.local.set(items, resolve));
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const dateFilterEnabled = document.getElementById("dateFilterEnabled");
   const wordCountEnabled = document.getElementById("wordCountEnabled");
@@ -756,7 +784,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   exportBtn.addEventListener("click", async () => {
     try {
-      const raw = await chrome.storage.local.get(EXPORT_KEYS);
+      const raw = await storageGet(EXPORT_KEYS);
 
       const exportPayload = {
         _meta: {
@@ -853,7 +881,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    await chrome.storage.local.set(safeSettings);
+    await storageSet(safeSettings);
     showImportStatus(`Imported ${Object.keys(safeSettings).length} settings.`, false);
 
     // Reload popup UI to reflect imported values.
