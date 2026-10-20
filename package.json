@@ -1,6 +1,6 @@
 {
   "name": "comment-vaccinator",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "YouTube comment filter extension",
   "private": true,
   "type": "module",
