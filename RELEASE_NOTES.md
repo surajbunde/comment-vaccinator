@@ -40,6 +40,8 @@ Five new filters, all disabled by default, so your existing setup behaves exactl
 
 New in Comment Stats: a "hidden by filter" breakdown showing how many comments each filter removed, so you can fine-tune the settings that matter.
 
+Fixed: Export Settings produced a file with no settings, and Import Settings did not apply, because Firefox's chrome.storage API is callback-only. Both now work correctly in Firefox.
+
 The keyword whitelist continues to override every other filter, and all existing settings and custom patterns carry over untouched.
 ```
 
