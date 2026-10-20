@@ -60,16 +60,18 @@ function getCommentText(threadElement) {
   return null;
 }
 
-function hideThread(el, reason) {
+function hideThread(el, reason, reasonCode) {
   el.style.display = "none";
   el.dataset.cvHidden = "1";
   el.dataset.cvReason = reason;
+  el.dataset.cvReasonCode = reasonCode || "";
 }
 
 function showThread(el) {
   el.style.display = "";
   el.dataset.cvHidden = "0";
   el.dataset.cvReason = "";
+  el.dataset.cvReasonCode = "";
 }
 
 /**
@@ -95,7 +97,7 @@ function processThread(threadElement) {
 
     const result = runPipeline(text, settings);
     if (result.hide) {
-      hideThread(threadElement, result.reason);
+      hideThread(threadElement, result.reason, result.reasonCode);
     } else {
       showThread(threadElement);
     }
@@ -141,8 +143,20 @@ function updateBadge() {
 
 function getStats() {
   const all = document.querySelectorAll("[data-cv-processed='1']");
-  const hidden = Array.from(all).filter((el) => el.dataset.cvHidden === "1").length;
-  return { total: all.length, hidden, visible: all.length - hidden };
+  const hidden = Array.from(all).filter((el) => el.dataset.cvHidden === "1");
+
+  const byReason = {};
+  for (const el of hidden) {
+    const code = el.dataset.cvReasonCode || "unknown";
+    byReason[code] = (byReason[code] || 0) + 1;
+  }
+
+  return {
+    total: all.length,
+    hidden: hidden.length,
+    visible: all.length - hidden.length,
+    byReason,
+  };
 }
 
 // --- Video ID publisher ---
