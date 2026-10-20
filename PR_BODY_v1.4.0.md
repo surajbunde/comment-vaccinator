@@ -18,6 +18,29 @@ This branch also **cherry-picks PR #8** (`chore-support-button`, which was close
 
 Without this, publishing v1.4.0 would have **removed the donation box from the live extension**. The built `popup.html` is now `+75 / -0` lines versus the currently published one, so nothing that is live today regresses.
 
+## Bug Fixes
+
+### Export / Import Settings were broken in Firefox
+
+Firefox's `chrome.*` namespace is callback-only in an extension page — `chrome.storage.local.get(keys)` returns `undefined` instead of a Promise, so `await` on it resolved to `undefined`.
+
+In the published Firefox 1.3.5 build this meant:
+- **Export** wrote a file containing only `_meta` and **no settings at all**
+- **Import** silently wrote **nothing**, then reloaded the popup as if it had worked
+
+Fixed by adding `storageGet()` / `storageSet()` helpers to `popup.js` that use the callback form, which both Chrome and Firefox support.
+
+The content script is unaffected — promise-style `chrome.storage.*` does work in a Firefox content script — so `src/storage/settingsCache.js` is unchanged, with a comment added so the difference is not "cleaned up" later.
+
+Verified against the built packages in both browsers:
+
+| | Before | After |
+|---|---|---|
+| Firefox 158 (MV2) export | `{_meta}` only | 8 settings, 551 bytes |
+| Firefox 158 (MV2) import | wrote nothing | writes the imported value |
+| Chrome (MV3) export | 8 settings | 8 settings, 1567 bytes |
+| Chrome (MV3) import | writes the value | writes the value |
+
 ## Files Changed
 
 | File | Description |
@@ -61,12 +84,18 @@ Deliberate care taken so the new filters don't hide real comments:
 
 ## Testing
 
-- **211 tests passing** (138 before, 73 new) — written test-first, each new test watched fail before the implementation
+- **217 tests passing** (138 before, 79 new) — written test-first, each new test watched fail before the implementation
 - `npm test`, `npm run validate` and `npm run build` all pass; Chrome + Firefox v1.4.0 zips built
-- **Browser-verified** with Playwright against the real built extension:
-  - Popup renders correctly, all five filters default to off, toggles persist to `chrome.storage.local`, preview and enable/disable wiring behave
-  - Content script end-to-end on a simulated YouTube page — each filter hides the right comments, the whitelist protects a linked comment, the domain allow-list keeps an allowed domain visible, and the `byReason` breakdown matches the hidden comments
-  - No console or page errors in either context
+- **Browser-verified in real Firefox 158 (MV2)** via Marionette, using the actual built package as a temporary add-on:
+  - Extension installs, popup renders, all five filters default to OFF, toggling persists to `cv_spamFilters`, section preview and dependent inputs behave
+  - The MV2 content script injects on real `www.youtube.com` and **all five filters fire with the correct reason codes** (`date`, `links`, `contacts`, `caps`, `punctuation`, `locale-date`)
+  - The keyword whitelist overrides the spam pack, and the domain allow-list keeps allowed links visible
+  - `byReason` breakdown returned to the popup correctly
+  - Export/Import round-trip verified (the fix above)
+- **Browser-verified in Chrome** with Playwright against the real built extension:
+  - Popup renders, toggles persist, all filters behave, `byReason` breakdown correct
+  - Export/Import round-trip verified (the fix above)
+- No console or page errors in either browser
 
 ## Screenshots
 
