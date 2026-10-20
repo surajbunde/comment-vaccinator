@@ -469,3 +469,107 @@ describe("word count filter", () => {
     assert.equal(result.hide, false);
   });
 });
+
+const spamBase = {
+  ...baseSettings,
+  dateFilterEnabled: false,
+  spamFilters: {
+    linksEnabled: false,
+    linksAllowedDomains: "",
+    contactsEnabled: false,
+    capsEnabled: false,
+    capsMinLength: 15,
+    punctuationEnabled: false,
+    localesEnabled: false,
+  },
+};
+
+describe("runPipeline with the spam filter pack", () => {
+  it("does not hide a link comment when the pack is off", () => {
+    const result = runPipeline("visit https://spam.com", spamBase);
+    assert.equal(result.hide, false);
+  });
+
+  it("hides a link comment when the pack is on", () => {
+    const result = runPipeline("visit https://spam.com", {
+      ...spamBase,
+      spamFilters: { ...spamBase.spamFilters, linksEnabled: true },
+    });
+    assert.equal(result.hide, true);
+    assert.equal(result.reasonCode, "links");
+  });
+
+  it("keeps the whitelist on top of the spam pack", () => {
+    const result = runPipeline("visit https://spam.com analysis", {
+      ...spamBase,
+      whitelist: ["analysis"],
+      spamFilters: { ...spamBase.spamFilters, linksEnabled: true },
+    });
+    assert.equal(result.hide, false);
+  });
+
+  it("keeps the blacklist above the spam pack", () => {
+    const result = runPipeline("https://spam.com subscribe", {
+      ...spamBase,
+      keywordEnabled: true,
+      blacklist: ["subscribe"],
+      spamFilters: { ...spamBase.spamFilters, linksEnabled: true },
+    });
+    assert.equal(result.reasonCode, "keyword");
+  });
+
+  it("reports the spam pack before the date filter", () => {
+    const result = runPipeline("https://spam.com 12/04/24", {
+      ...spamBase,
+      dateFilterEnabled: true,
+      spamFilters: { ...spamBase.spamFilters, linksEnabled: true },
+    });
+    assert.equal(result.reasonCode, "links");
+  });
+
+  it("exposes a reasonCode on every result", () => {
+    assert.equal(typeof runPipeline("plain comment", spamBase).reasonCode, "string");
+    assert.equal(
+      runPipeline("https://spam.com", {
+        ...spamBase,
+        spamFilters: { ...spamBase.spamFilters, linksEnabled: true },
+      }).reasonCode,
+      "links"
+    );
+  });
+
+  it("tags the existing filters with stable reason codes", () => {
+    assert.equal(
+      runPipeline("Anyone here in 2025?", { ...spamBase, dateFilterEnabled: true }).reasonCode,
+      "date"
+    );
+    assert.equal(
+      runPipeline("Please subscribe", {
+        ...spamBase,
+        keywordEnabled: true,
+        blacklist: ["subscribe"],
+      }).reasonCode,
+      "keyword"
+    );
+    assert.equal(
+      runPipeline("😂😂", { ...spamBase, emojiOnlyEnabled: true }).reasonCode,
+      "emoji-only"
+    );
+    assert.equal(
+      runPipeline("one two", {
+        ...spamBase,
+        wordCountMode: "max",
+        wordCountValue: 5,
+      }).reasonCode,
+      "word-count"
+    );
+  });
+
+  it("works without a spamFilters setting at all", () => {
+    const result = runPipeline("visit https://spam.com", {
+      ...baseSettings,
+      dateFilterEnabled: false,
+    });
+    assert.equal(result.hide, false);
+  });
+});

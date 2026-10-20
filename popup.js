@@ -4,6 +4,34 @@
  * Uses cv_ prefixed storage keys.
  */
 
+/**
+ * Reads from extension storage.
+ *
+ * Firefox's `chrome.*` namespace in an extension page is callback-only:
+ * `chrome.storage.local.get(keys)` returns undefined instead of a Promise,
+ * so `await` on it silently resolves to undefined and an exported config
+ * ends up with no settings at all. The callback form is supported by both
+ * Chrome and Firefox, so it is used everywhere in the popup.
+ *
+ * Declared at the top level (not inside the DOMContentLoaded handler) so it
+ * can be unit tested directly.
+ *
+ * @param {string|string[]} keys - Storage keys to read.
+ * @returns {Promise<Object>} The stored values.
+ */
+function storageGet(keys) {
+  return new Promise((resolve) => chrome.storage.local.get(keys, resolve));
+}
+
+/**
+ * Writes to extension storage.
+ * @param {Object} items - Key/value pairs to store.
+ * @returns {Promise<void>} Resolves once the write completes.
+ */
+function storageSet(items) {
+  return new Promise((resolve) => chrome.storage.local.set(items, resolve));
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const dateFilterEnabled = document.getElementById("dateFilterEnabled");
   const wordCountEnabled = document.getElementById("wordCountEnabled");
@@ -20,6 +48,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const perVideoId = document.getElementById("perVideoId");
   const whitelistEnabled = document.getElementById("whitelistEnabled");
   const whitelist = document.getElementById("whitelist");
+  const spamFiltersSection = document.getElementById("spam-filters-section");
+  const spamFiltersPreview = document.getElementById("spamFiltersPreview");
+  const linksEnabled = document.getElementById("linksEnabled");
+  const linksAllowedDomains = document.getElementById("linksAllowedDomains");
+  const contactsEnabled = document.getElementById("contactsEnabled");
+  const capsEnabled = document.getElementById("capsEnabled");
+  const capsMinLength = document.getElementById("capsMinLength");
+  const punctuationEnabled = document.getElementById("punctuationEnabled");
+  const localesEnabled = document.getElementById("localesEnabled");
   const statsListBtn = document.getElementById("statsListBtn");
   const statsChartBtn = document.getElementById("statsChartBtn");
   const summaryList = document.getElementById("summaryList");
@@ -43,6 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "cv_customPatternsEnabled",
       "cv_whitelistEnabled",
       "cv_whitelist",
+      "cv_spamFilters",
     ],
     (data) => {
       dateFilterEnabled.checked = data.cv_dateFilterEnabled !== undefined ? data.cv_dateFilterEnabled : true;
@@ -62,6 +100,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
       customPatternsEnabled.checked = data.cv_customPatternsEnabled !== undefined ? data.cv_customPatternsEnabled : false;
       patternEditorBody.style.display = customPatternsEnabled.checked ? "block" : "none";
+
+      // Spam filter pack.
+      let spamFilters = {};
+      try {
+        spamFilters = JSON.parse(data.cv_spamFilters || "{}") || {};
+      } catch (_) {
+        spamFilters = {};
+      }
+      linksEnabled.checked = Boolean(spamFilters.linksEnabled);
+      linksAllowedDomains.value = spamFilters.linksAllowedDomains || "";
+      contactsEnabled.checked = Boolean(spamFilters.contactsEnabled);
+      capsEnabled.checked = Boolean(spamFilters.capsEnabled);
+      capsMinLength.value = spamFilters.capsMinLength || 15;
+      punctuationEnabled.checked = Boolean(spamFilters.punctuationEnabled);
+      localesEnabled.checked = Boolean(spamFilters.localesEnabled);
+
+      linksAllowedDomains.disabled = !linksEnabled.checked;
+      capsMinLength.disabled = !capsEnabled.checked;
+      spamFiltersSection.dataset.enabled = spamFiltersSectionEnabled();
+      updateSpamPreview();
 
       // Initial UI state
       wordCountControls.style.display = wordCountEnabled.checked ? "block" : "none";
@@ -126,6 +184,30 @@ document.addEventListener("DOMContentLoaded", () => {
     emojiFilterEnabled.disabled = !isWcEnabled;
     keywordList.disabled = !keywordEnabled.checked;
 
+    // Spam filter pack.
+    let capsLen = parseInt(capsMinLength.value, 10);
+    if (isNaN(capsLen) || capsLen < 5) {
+      capsLen = 5;
+    } else if (capsLen > 100) {
+      capsLen = 100;
+    }
+    capsMinLength.value = capsLen;
+
+    linksAllowedDomains.disabled = !linksEnabled.checked;
+    capsMinLength.disabled = !capsEnabled.checked;
+    spamFiltersSection.dataset.enabled = spamFiltersSectionEnabled();
+    updateSpamPreview();
+
+    const spamFilters = {
+      linksEnabled: linksEnabled.checked,
+      linksAllowedDomains: linksAllowedDomains.value.trim(),
+      contactsEnabled: contactsEnabled.checked,
+      capsEnabled: capsEnabled.checked,
+      capsMinLength: capsLen,
+      punctuationEnabled: punctuationEnabled.checked,
+      localesEnabled: localesEnabled.checked,
+    };
+
     chrome.storage.local.set(
       {
         cv_dateFilterEnabled: dateFilterEnabled.checked,
@@ -138,6 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
         cv_customPatternsEnabled: customPatternsEnabled.checked,
         cv_whitelistEnabled: whitelistEnabled.checked,
         cv_whitelist: whitelist.value.trim(),
+        cv_spamFilters: JSON.stringify(spamFilters),
       },
       () => {
         // Notify content script to re-filter immediately.
@@ -182,6 +265,40 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   emojiFilterEnabled.addEventListener("change", saveSettings);
   emojiOnlyEnabled.addEventListener("change", saveSettings);
+
+  // Spam filter pack listeners.
+  [linksEnabled, contactsEnabled, capsEnabled, punctuationEnabled, localesEnabled].forEach(
+    (el) => el.addEventListener("change", saveSettings)
+  );
+  linksAllowedDomains.addEventListener("change", saveSettings);
+  capsMinLength.addEventListener("change", saveSettings);
+
+  /**
+   * Returns whether any spam filter is currently enabled.
+   * @returns {boolean}
+   */
+  function spamFiltersSectionEnabled() {
+    return (
+      linksEnabled.checked ||
+      contactsEnabled.checked ||
+      capsEnabled.checked ||
+      punctuationEnabled.checked ||
+      localesEnabled.checked
+    );
+  }
+
+  /**
+   * Updates the collapsed-section preview with the active spam filters.
+   */
+  function updateSpamPreview() {
+    const active = [];
+    if (linksEnabled.checked) active.push("links");
+    if (contactsEnabled.checked) active.push("contacts");
+    if (capsEnabled.checked) active.push("caps");
+    if (punctuationEnabled.checked) active.push("punctuation");
+    if (localesEnabled.checked) active.push("locales");
+    spamFiltersPreview.textContent = active.length ? active.join(", ") : "";
+  }
 
   // Whitelist toggle and input
   whitelistEnabled.addEventListener("change", () => {
@@ -256,14 +373,65 @@ document.addEventListener("DOMContentLoaded", () => {
       chrome.tabs.sendMessage(tabs[0].id, { type: "GET_COUNTS" }, (response) => {
         if (chrome.runtime.lastError) {
           updateStatsDisplay({ total: 0, hidden: 0, visible: 0 });
+          renderReasonBreakdown({});
           return;
         }
 
         if (response) {
           updateStatsDisplay(response);
+          renderReasonBreakdown(response.byReason);
         }
       });
     });
+  }
+
+  const REASON_LABELS = {
+    date: "Date pattern",
+    "locale-date": "Extra date locale",
+    links: "Links",
+    contacts: "Contact details",
+    caps: "All caps",
+    punctuation: "Spam punctuation",
+    keyword: "Blacklist keyword",
+    "custom-pattern": "Custom pattern",
+    "emoji-only": "Emoji only",
+    "word-count": "Word count",
+    unknown: "Other",
+  };
+
+  /**
+   * Renders the "hidden by filter" breakdown list.
+   * @param {Object} byReason - Map of reason code to hidden count.
+   */
+  function renderReasonBreakdown(byReason) {
+    const rows = document.getElementById("reasonBreakdownRows");
+    const totalEl = document.getElementById("reasonBreakdownTotal");
+    if (!rows || !totalEl) return;
+
+    const entries = Object.entries(byReason || {}).filter(([, n]) => n > 0);
+    entries.sort((a, b) => b[1] - a[1]);
+    totalEl.textContent = entries.reduce((sum, [, n]) => sum + n, 0);
+
+    rows.innerHTML = "";
+    if (entries.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "reason-row";
+      empty.textContent = "Nothing hidden yet.";
+      rows.appendChild(empty);
+      return;
+    }
+
+    for (const [code, count] of entries) {
+      const row = document.createElement("div");
+      row.className = "reason-row";
+      const label = document.createElement("span");
+      label.textContent = REASON_LABELS[code] || code;
+      const value = document.createElement("span");
+      value.textContent = count;
+      row.appendChild(label);
+      row.appendChild(value);
+      rows.appendChild(row);
+    }
   }
 
   function renderSummaryChart(total, hidden, visible) {
@@ -599,6 +767,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "cv_emojiOnlyEnabled",
     "cv_customPatternsEnabled",
     "cv_customPatterns",
+    "cv_spamFilters",
     // Note: cv_perVideoDisabled and cv_currentVideoId are intentionally excluded —
     // they are device/session context, not shareable config.
   ];
@@ -615,7 +784,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   exportBtn.addEventListener("click", async () => {
     try {
-      const raw = await chrome.storage.local.get(EXPORT_KEYS);
+      const raw = await storageGet(EXPORT_KEYS);
 
       const exportPayload = {
         _meta: {
@@ -692,13 +861,27 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    // Validate cv_spamFilters if present — must be a JSON object.
+    if (safeSettings.cv_spamFilters) {
+      try {
+        const parsed = JSON.parse(safeSettings.cv_spamFilters);
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+          throw new Error("expected a JSON object");
+        }
+      } catch (e) {
+        showImportStatus(`Invalid spam filter settings in file: ${e.message}`, true);
+        importFile.value = "";
+        return;
+      }
+    }
+
     // Confirm before overwriting.
     if (!confirm("This will overwrite your current settings. Continue?")) {
       importFile.value = "";
       return;
     }
 
-    await chrome.storage.local.set(safeSettings);
+    await storageSet(safeSettings);
     showImportStatus(`Imported ${Object.keys(safeSettings).length} settings.`, false);
 
     // Reload popup UI to reflect imported values.

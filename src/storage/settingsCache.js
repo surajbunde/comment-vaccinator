@@ -10,12 +10,20 @@
  *   cv_whitelist           {string}   Comma-separated whitelist keywords. Default: ''.
  *   cv_customPatterns      {string}   JSON array of {name, patternSource, flags} objects. Default: '[]'.
  *   cv_customPatternsEnabled {boolean} Enable custom pattern filtering. Default: false.
+ *   cv_spamFilters          {string}  JSON blob of spam filter settings. Default: '{}'.
  *   cv_perVideoDisabled    {string}   JSON array of video IDs where filtering is off. Default: '[]'.
  *   cv_currentVideoId      {string}   Current YouTube video ID. Default: ''.
  *   cv_debugMode           {boolean}  Enable verbose logging. Default: false.
  */
 
 import { parseKeywordList } from "../matchers/keywords.js";
+import { DEFAULT_SPAM_SETTINGS } from "../matchers/spamFilters.js";
+
+// NOTE: The promise form of chrome.storage.* works in a Firefox content
+// script, but NOT in a Firefox extension page (the popup) — there
+// chrome.storage.local.get() returns undefined instead of a Promise.
+// The popup therefore uses the callback form via its own storageGet() /
+// storageSet() helpers. Do not "simplify" these calls into the other style.
 
 /**
  * @typedef {Object} Settings
@@ -29,6 +37,7 @@ import { parseKeywordList } from "../matchers/keywords.js";
  * @property {boolean}  emojiOnlyEnabled
  * @property {boolean}  customPatternsEnabled
  * @property {Array<{name:string, pattern:RegExp}>} customPatterns
+ * @property {Object}    spamFilters      - Spam filter pack settings.
  * @property {string[]} perVideoDisabled  - Array of YouTube video IDs.
  * @property {string}   currentVideoId
  * @property {boolean}  debugMode
@@ -45,6 +54,7 @@ const DEFAULTS = {
   cv_emojiOnlyEnabled: false,
   cv_customPatternsEnabled: false,
   cv_customPatterns: "[]",
+  cv_spamFilters: "{}",
   cv_perVideoDisabled: "[]",
   cv_currentVideoId: "",
   cv_debugMode: false,
@@ -84,6 +94,24 @@ function buildFromRaw(raw) {
     perVideoDisabled = [];
   }
 
+  let spamFilters = { ...DEFAULT_SPAM_SETTINGS };
+  try {
+    const parsed = JSON.parse(raw.cv_spamFilters || "{}");
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      spamFilters = {
+        linksEnabled: Boolean(parsed.linksEnabled ?? false),
+        linksAllowedDomains: String(parsed.linksAllowedDomains ?? ""),
+        contactsEnabled: Boolean(parsed.contactsEnabled ?? false),
+        capsEnabled: Boolean(parsed.capsEnabled ?? false),
+        capsMinLength: Number(parsed.capsMinLength ?? 15) || 15,
+        punctuationEnabled: Boolean(parsed.punctuationEnabled ?? false),
+        localesEnabled: Boolean(parsed.localesEnabled ?? false),
+      };
+    }
+  } catch (_) {
+    spamFilters = { ...DEFAULT_SPAM_SETTINGS };
+  }
+
   return {
     dateFilterEnabled: Boolean(raw.cv_dateFilterEnabled ?? true),
     wordCountMode: raw.cv_wordCountMode ?? "off",
@@ -95,6 +123,7 @@ function buildFromRaw(raw) {
     emojiOnlyEnabled: Boolean(raw.cv_emojiOnlyEnabled ?? false),
     customPatternsEnabled: Boolean(raw.cv_customPatternsEnabled ?? false),
     customPatterns,
+    spamFilters,
     perVideoDisabled,
     currentVideoId: raw.cv_currentVideoId ?? "",
     debugMode: Boolean(raw.cv_debugMode ?? false),

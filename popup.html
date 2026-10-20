@@ -373,6 +373,21 @@
     .summary-list .count-group strong {
       color: inherit;
     }
+    .reason-breakdown {
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px solid var(--line);
+    }
+    .reason-breakdown .count-group strong {
+      color: #bd77ff;
+    }
+    .reason-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted);
+      padding: 1px 0;
+    }
     .summary-chart-grid {
       display: grid;
       grid-template-columns: 88px 1fr;
@@ -564,6 +579,58 @@
     </div>
   </div>
 
+  <details id="spam-filters-section" class="setting-group">
+    <summary>
+      Spam Filters:
+      <span class="preview-text" id="spamFiltersPreview"></span>
+    </summary>
+    <div id="spamFiltersBody">
+      <div class="flex-row">
+        <label for="linksEnabled" title="Hides comments that contain a link. Use the allow-list to keep specific sites visible.">Links:</label>
+        <label class="switch">
+            <input type="checkbox" id="linksEnabled">
+            <span class="slider"></span>
+        </label>
+      </div>
+      <input id="linksAllowedDomains" type="text" placeholder="Allowed domains (e.g. youtube.com, reddit.com)" style="width:100%;padding:6px;border:1px solid var(--line);border-radius:6px;font-size:12px;color:var(--text);background:var(--input-bg);margin-bottom:10px;" />
+      <div class="flex-row">
+        <label for="contactsEnabled" title="Hides comments containing an email address, a phone number, or a Telegram/WhatsApp handle.">Contact Details:</label>
+        <label class="switch">
+            <input type="checkbox" id="contactsEnabled">
+            <span class="slider"></span>
+        </label>
+      </div>
+      <div class="flex-row" style="margin-top:10px;">
+        <label for="capsEnabled" title="Hides comments written entirely in capital letters.">All-Caps Comments:</label>
+        <label class="switch">
+            <input type="checkbox" id="capsEnabled">
+            <span class="slider"></span>
+        </label>
+      </div>
+      <div class="flex-row" style="margin-top:6px;">
+        <label for="capsMinLength">Minimum Letters:</label>
+        <input type="number" id="capsMinLength" min="5" max="100" style="width:70px;">
+      </div>
+      <div class="flex-row" style="margin-top:10px;">
+        <label for="punctuationEnabled" title="Hides comments with repeated punctuation, repeated characters, doubled words, or spaced-out text.">Spam Punctuation:</label>
+        <label class="switch">
+            <input type="checkbox" id="punctuationEnabled">
+            <span class="slider"></span>
+        </label>
+      </div>
+      <div class="flex-row" style="margin-top:10px;">
+        <label for="localesEnabled" title="Hides date mentions written in Spanish, French, German, Portuguese, or Russian.">Extra Date Locales (ES/FR/DE/PT/RU):</label>
+        <label class="switch">
+            <input type="checkbox" id="localesEnabled">
+            <span class="slider"></span>
+        </label>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">
+        Every spam filter is off by default. The whitelist always overrides them.
+      </div>
+    </div>
+  </details>
+
   <details id="pattern-editor-section" class="setting-group">
     <summary>Advanced: Custom Patterns</summary>
     <div class="flex-row" style="margin-top:8px;">
@@ -603,6 +670,14 @@
       <div class="count-group">Total Comments <strong id="total">0</strong></div>
       <div class="count-group">Hidden Comments <strong id="hidden">0</strong></div>
       <div class="count-group">Visible Comments <strong id="visible">0</strong></div>
+    </div>
+
+    <div class="reason-breakdown" id="reasonBreakdown">
+      <div class="count-group">
+        <span>Hidden by filter</span>
+        <strong id="reasonBreakdownTotal">0</strong>
+      </div>
+      <div id="reasonBreakdownRows"></div>
     </div>
 
     <div class="summary-chart" id="summaryChart" data-view="list">

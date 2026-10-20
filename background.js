@@ -11,6 +11,7 @@ const DEFAULTS = {
   cv_blacklist: "",
   cv_whitelist: "",
   cv_customPatterns: "[]",
+  cv_spamFilters: "{}",
   cv_perVideoDisabled: "[]",
   cv_currentVideoId: "",
   cv_debugMode: false,
