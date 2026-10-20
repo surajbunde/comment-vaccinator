@@ -44,7 +44,7 @@ Hide repetitive YouTube comments that contain date-like phrases, while preservin
 - ES modules in `src/` bundled via esbuild to single `content.js`
 - Popup UI (`popup.html`, `popup.js`)
 - Local storage for settings (`chrome.storage.local`, `cv_` namespace)
-- `node:test` test harness (209 tests)
+- `node:test` test harness (217 tests)
 
 ## Project Structure
 
@@ -65,8 +65,9 @@ Hide repetitive YouTube comments that contain date-like phrases, while preservin
 - `src/content/main.js` - content script entry point
 - `popup.html` - extension popup UI
 - `popup.js` - popup settings, custom pattern editor
+- `tests/e2e/` - browser end-to-end tests (Chrome via DevTools Protocol, Firefox via Marionette)
 - `background.js` - default settings on install, badge
-- `build.cjs` - esbuild bundler + zip creator
+- `build.cjs` - esbuild bundler + zip creator (Chrome + Firefox)
 - `icon-32.png`, `icon-48.png`, `icon-128.png` - extension icons
 
 ## Local Development and Testing
@@ -81,7 +82,8 @@ npm run build
 Outputs to `build/`:
 - `comment-vaccinator-chrome-v1.4.0.zip`
 - `comment-vaccinator-firefox-v1.4.0.zip`
-- `chrome-unpacked/` (for "Load unpacked" testing)
+- `chrome-unpacked/` (for "Load unpacked" in Chrome)
+- `firefox-unpacked/` (for "Load Temporary Add-on" in Firefox)
 
 ### 2. Run Tests
 
@@ -89,9 +91,22 @@ Outputs to `build/`:
 npm test
 ```
 
-209 tests covering all matchers, pipeline logic, word count edge cases, custom pattern validation, export/import settings, and the spam filter pack.
+217 tests covering all matchers, pipeline logic, word count edge cases, custom pattern validation, export/import settings, and the spam filter pack.
 
-### 3. Validate Manifests
+### 3. Run Browser End-to-End Tests
+
+```bash
+npm run test:e2e            # both browsers
+npm run test:e2e:chrome     # Chrome / Edge / Brave / Chromium
+npm run test:e2e:firefox    # Firefox
+```
+
+These drive a **real browser** against the built extension and verify the
+popup, the content script and the settings import/export. They are
+dependency-free — you only need the browser itself (Node 22+). See
+[`tests/e2e/README.md`](tests/e2e/README.md) for details.
+
+### 4. Validate Manifests
 
 ```bash
 npm run validate
@@ -99,7 +114,7 @@ npm run validate
 
 Checks both manifests for Chrome MV3 and Firefox MV2 compatibility. Runs automatically before every build — blocks build on errors.
 
-### 4. Load Unpacked in Chrome
+### 5. Load Unpacked in Chrome
 
 1. Open `chrome://extensions`
 2. Enable **Developer mode**
@@ -108,7 +123,7 @@ Checks both manifests for Chrome MV3 and Firefox MV2 compatibility. Runs automat
 5. Open any YouTube video with comments
 6. Open extension popup and test settings
 
-### 4. Load Unpacked in Edge
+### 6. Load Unpacked in Edge
 
 1. Open `edge://extensions`
 2. Enable **Developer mode**
@@ -116,11 +131,11 @@ Checks both manifests for Chrome MV3 and Firefox MV2 compatibility. Runs automat
 4. Select `build/chrome-unpacked/`
 5. Test on YouTube as above
 
-### 5. Temporary Add-on in Firefox
+### 7. Temporary Add-on in Firefox
 
 1. Open `about:debugging#/runtime/this-firefox`
 2. Click **Load Temporary Add-on**
-3. Select `manifest.json` from project root
+3. Select `build/firefox-unpacked/manifest.json` (or `manifest.json` from the project root)
 4. Open YouTube and validate behavior
 
 ## Manual Test Checklist

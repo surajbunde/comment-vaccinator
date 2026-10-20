@@ -27,7 +27,18 @@ Pre-build manifest validation checks:
 ```bash
 npm test
 ```
-209 tests covering all matchers, pipeline logic, word count edge cases, custom pattern validation, export/import settings, and the spam filter pack.
+
+217 tests covering all matchers, pipeline logic, word count edge cases, custom pattern validation, export/import settings, and the spam filter pack.
+
+Browser end-to-end tests (real Chrome via DevTools Protocol, real Firefox via Marionette, no extra dependencies):
+
+```bash
+npm run test:e2e            # both browsers
+npm run test:e2e:chrome     # Chrome / Edge / Brave / Chromium
+npm run test:e2e:firefox    # Firefox
+```
+
+See `tests/e2e/README.md` for how they work (local HTTP server + a patched copy of the build; the shipped manifest is never modified).
 
 ## Key Files
 
@@ -52,7 +63,8 @@ npm test
 | `background.js` | Default settings on install, badge handling |
 | `manifest.json` | Chrome MV3 |
 | `manifest-firefox.json` | Firefox MV2 (desktop + Android) |
-| `build.cjs` | esbuild bundler + zip creator |
+| `build.cjs` | esbuild bundler + zip creator (Chrome + Firefox) |
+| `tests/e2e/` | Browser end-to-end tests (Chrome via DevTools Protocol, Firefox via Marionette) |
 | `validate.cjs` | Pre-build manifest validation (Chrome MV3 + Firefox MV2) |
 | `package.json` | esbuild devDependency, scripts |
 

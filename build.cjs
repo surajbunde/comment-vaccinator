@@ -49,7 +49,7 @@ function copyExtensionFiles(dest) {
   fs.cpSync("content.js", path.join(dest, "content.js"));
 }
 
-// 2. Create zip for each target + unpacked folder for Chrome
+// 2. Create zip for each target + unpacked folder for local testing
 for (const t of targets) {
   // Zip
   const tmp = fs.mkdtempSync("build-");
@@ -69,17 +69,16 @@ for (const t of targets) {
   fs.rmSync(tmp, { recursive: true, force: true });
   console.log(`Created ${out}`);
 
-  // Unpacked folder (for Chrome "Load unpacked")
-  if (t.name === "chrome") {
-    const unpackedDir = path.join(BUILD, "chrome-unpacked");
-    if (fs.existsSync(unpackedDir)) {
-      fs.rmSync(unpackedDir, { recursive: true, force: true });
-    }
-    fs.mkdirSync(unpackedDir, { recursive: true });
-    copyExtensionFiles(unpackedDir);
-    fs.cpSync(t.manifest, path.join(unpackedDir, "manifest.json"));
-    console.log(`Created ${unpackedDir} (use "Load unpacked" in chrome://extensions)`);
+  // Unpacked folder (Chrome: "Load unpacked" in chrome://extensions,
+  // Firefox: "Load Temporary Add-on" from about:debugging)
+  const unpackedDir = path.join(BUILD, `${t.name}-unpacked`);
+  if (fs.existsSync(unpackedDir)) {
+    fs.rmSync(unpackedDir, { recursive: true, force: true });
   }
+  fs.mkdirSync(unpackedDir, { recursive: true });
+  copyExtensionFiles(unpackedDir);
+  fs.cpSync(t.manifest, path.join(unpackedDir, "manifest.json"));
+  console.log(`Created ${unpackedDir}`);
 }
 
 // Clean up bundled content.js from root (it's only needed in zips)
