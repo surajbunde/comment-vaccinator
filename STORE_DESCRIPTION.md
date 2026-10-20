@@ -12,7 +12,7 @@ Use the text below for your Chrome Web Store and Firefox Add-ons listings.
 
 ## Detailed Description (Full Store Listing)
 
-Clean up YouTube comments by automatically filtering repetitive date comments, keyword spam, low-effort posts, and unwanted phrases. Comment Vaccinator helps you focus on meaningful discussions by removing comments such as "Anyone here in 2026?", "First!", "Subscribe", repetitive keywords, and other low-value clutter in real time. Customize filtering with date detection, word-count rules, keyword blacklists, emoji-aware counting, and live comment statistics.
+Clean up YouTube comments by automatically filtering repetitive date comments, keyword spam, low-effort posts, and unwanted phrases. Comment Vaccinator helps you focus on meaningful discussions by removing comments such as "Anyone here in 2026?", "First!", "Subscribe", repetitive keywords, and other low-value clutter in real time. Customize filtering with date detection, word-count rules, keyword blacklists, emoji-aware counting, a spam-filter pack for links, contact details, shouting and punctuation, and live comment statistics.
 
 Detects and filters date-based comments in both English and Hindi (Devanagari) formats.
 
@@ -53,6 +53,18 @@ Protect comments containing specific words:
 
 Hides comments containing ONLY emoji characters.
 
+### 🧹 Spam Filters
+
+Five extra filters for the usual promo and spam patterns. **All of them are off by default** — switch on only the ones you want.
+
+- **Links** — hides comments containing a URL (`https://…`, `www.…`, or a bare domain). Add an allow-list such as `youtube.com, reddit.com` to keep trusted links visible.
+- **Contact details** — hides comments carrying an email address, a phone number, or a Telegram/WhatsApp handle.
+- **All-caps** — hides comments written entirely in capital letters. Set the minimum letter count so short acronyms are left alone.
+- **Spam punctuation** — hides comments with `!!!`, `???`, `....`, repeated characters, doubled words, or spaced-out text like `s u b s c r i b e`.
+- **Extra date locales** — hides date mentions written in Spanish, French, German, Portuguese, and Russian (`hace 3 días`, `il y a 2 ans`, `vor 3 Tagen`, `há 2 dias`, `3 дня назад`).
+
+The keyword whitelist always overrides every spam filter, so a whitelisted comment is never hidden.
+
 ### 🔧 Custom Patterns
 
 10 preset regex patterns for common spam + add your own:
@@ -80,6 +92,7 @@ Real-time statistics right in the popup:
 - **Total** comments counted
 - **Hidden** comments (zapped by -inator)
 - **Visible** comments (passed all filters)
+- **Hidden by filter** — a breakdown of which filter caught how many comments
 - Switch between **list view** and **chart view** (donut chart)
 
 ### 🌙 Dark Mode Ready

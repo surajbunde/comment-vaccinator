@@ -24,13 +24,19 @@ Hide repetitive YouTube comments that contain date-like phrases, while preservin
 - Emoji-only filter: hides comments containing ONLY emoji characters.
 - Keyword blacklist (comma-separated): red border, red-tinted background.
 - Keyword whitelist: green border, green-tinted background. Overrides all other filters — matching comments always stay visible.
+- Spam Filters pack (all off by default, individually toggleable):
+  - **Links**: hides comments containing a URL, with an allowed-domains allow-list.
+  - **Contact details**: hides comments with an email, phone number, or Telegram/WhatsApp handle.
+  - **All-caps**: hides comments written entirely in capital letters (minimum letter count configurable).
+  - **Spam punctuation**: hides `!!!`, `???`, `....`, repeated characters, doubled words, spaced-out text.
+  - **Extra date locales**: hides date mentions in Spanish, French, German, Portuguese, and Russian.
 - Custom regex patterns: 10 preset spam patterns + add/edit/delete your own (with `i` flag).
 - Custom patterns toggle: disabled by default — presets ship inactive until you enable them.
 - Reset to defaults: resets the 10 OOTB presets to original values, keeps your custom patterns.
 - Per-video toggle: pause all filtering for the current video.
 - Export/Import settings: one-click export to JSON file, import from JSON to restore or share configurations.
 - Live re-filtering when YouTube loads more comments.
-- Popup stats: total, hidden, visible comments (list + chart view).
+- Popup stats: total, hidden, visible comments (list + chart view) plus a "hidden by filter" breakdown.
 
 ## Tech Stack
 
@@ -38,13 +44,19 @@ Hide repetitive YouTube comments that contain date-like phrases, while preservin
 - ES modules in `src/` bundled via esbuild to single `content.js`
 - Popup UI (`popup.html`, `popup.js`)
 - Local storage for settings (`chrome.storage.local`, `cv_` namespace)
-- `node:test` test harness (138 tests)
+- `node:test` test harness (209 tests)
 
 ## Project Structure
 
 - `manifest.json` - Chrome MV3 manifest
 - `manifest-firefox.json` - Firefox MV2 manifest (desktop + Android)
 - `src/matchers/datePatterns.js` - 17 date pattern matchers
+- `src/matchers/dateLocales.js` - ES/FR/DE/PT/RU date patterns (opt-in)
+- `src/matchers/links.js` - link detection with domain allow-list
+- `src/matchers/contacts.js` - email / phone / messenger detection
+- `src/matchers/caps.js` - all-caps shouting detection
+- `src/matchers/punctuation.js` - spam punctuation and repetition detection
+- `src/matchers/spamFilters.js` - composes the five spam-signal matchers
 - `src/matchers/wordCount.js` - emoji stripping, word counting
 - `src/matchers/keywords.js` - blacklist/whitelist keyword matching
 - `src/filters/pipeline.js` - composes all matchers
@@ -67,8 +79,8 @@ npm run build
 ```
 
 Outputs to `build/`:
-- `comment-vaccinator-chrome-v1.3.5.zip`
-- `comment-vaccinator-firefox-v1.3.5.zip`
+- `comment-vaccinator-chrome-v1.4.0.zip`
+- `comment-vaccinator-firefox-v1.4.0.zip`
 - `chrome-unpacked/` (for "Load unpacked" testing)
 
 ### 2. Run Tests
@@ -77,7 +89,7 @@ Outputs to `build/`:
 npm test
 ```
 
-138 tests covering all matchers, pipeline logic, word count edge cases, custom pattern validation, and export/import settings.
+209 tests covering all matchers, pipeline logic, word count edge cases, custom pattern validation, export/import settings, and the spam filter pack.
 
 ### 3. Validate Manifests
 
@@ -130,12 +142,17 @@ Use at least 3-5 videos with active comments and validate:
 13. Per-video toggle: toggle persists after closing and reopening popup.
 14. Toggling popup controls triggers live re-filtering.
 15. Page navigation within YouTube still preserves behavior.
+16. Spam Filters: enable each filter individually — links, contact details, all-caps, spam punctuation, extra date locales.
+17. Spam Filters: every filter is off by default after an upgrade — no comment changes behaviour until opted in.
+18. Spam Filters: an allow-listed domain in the links filter keeps its comments visible.
+19. Spam Filters: a whitelisted keyword still protects a comment that would match a spam filter.
+20. Stats: the "hidden by filter" breakdown lists the active filter counts.
 
 ## Release Readiness Checklist
 
 1. Validate manifest JSON syntax (no comments, no trailing commas).
 2. Verify required permissions only (`storage`).
-3. Run `npm test` — all 128 tests passing.
+3. Run `npm test` — all 209 tests passing.
 4. Run `npm run build` — zips + unpacked folder created.
 5. Perform manual test checklist on Chrome + Firefox + Edge.
 6. Prepare screenshots + description for store listings.

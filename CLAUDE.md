@@ -27,13 +27,19 @@ Pre-build manifest validation checks:
 ```bash
 npm test
 ```
-138 tests covering all matchers, pipeline logic, word count edge cases, custom pattern validation, and export/import settings.
+209 tests covering all matchers, pipeline logic, word count edge cases, custom pattern validation, export/import settings, and the spam filter pack.
 
 ## Key Files
 
 | File | Purpose |
 |------|---------|
 | `src/matchers/datePatterns.js` | 17 date pattern matchers + `matchesDate()` |
+| `src/matchers/dateLocales.js` | ES/FR/DE/PT/RU date patterns + `matchesLocaleDate()` |
+| `src/matchers/links.js` | `extractLinks()`, `matchesLinks()` (domain allow-list) |
+| `src/matchers/contacts.js` | `matchesContacts()` (email / phone / messenger) |
+| `src/matchers/caps.js` | `matchesCaps()` (all-caps shouting) |
+| `src/matchers/punctuation.js` | `matchesSpamPunctuation()` |
+| `src/matchers/spamFilters.js` | `runSpamFilters()` — composes the five spam signals |
 | `src/matchers/wordCount.js` | `stripEmoji()`, `countWords()`, `matchesWordCount()` |
 | `src/matchers/keywords.js` | `parseKeywordList()`, `matchesBlacklist()`, `matchesWhitelist()` |
 | `src/filters/pipeline.js` | `runPipeline()` — composes all matchers |
@@ -85,6 +91,7 @@ npm test
 | `cv_emojiOnlyEnabled` | boolean | `false` |
 | `cv_customPatterns` | JSON string | `"[]"` |
 | `cv_customPatternsEnabled` | boolean | `false` |
+| `cv_spamFilters` | JSON string | `"{}"` (all spam filters off) |
 | `cv_presetsInitialized` | boolean | `false` |
 | `cv_perVideoDisabled` | JSON string | `"[]"` |
 | `cv_currentVideoId` | string | `""` |
@@ -95,9 +102,12 @@ npm test
 1. **Whitelist** — always first, always wins
 2. **Emoji-only** — hides comments with only emoji characters
 3. **Keyword blacklist** — hides matching keywords (only if `keywordEnabled` is true)
-4. **Date pattern** — hides date mentions (only if `dateFilterEnabled` is true)
-5. **Custom patterns** — user-defined regex (only if `customPatternsEnabled` is true, independent of date filter)
-6. **Word count** — min/max threshold (only if `wordCountMode !== "off"`)
+4. **Spam filter pack** — contacts → links → all-caps → punctuation → extra date locales (each only if enabled in `cv_spamFilters`)
+5. **Date pattern** — hides date mentions (only if `dateFilterEnabled` is true)
+6. **Custom patterns** — user-defined regex (only if `customPatternsEnabled` is true, independent of date filter)
+7. **Word count** — min/max threshold (only if `wordCountMode !== "off"`)
+
+Every `FilterResult` carries a stable `reasonCode` (`whitelist`, `emoji-only`, `keyword`, `links`, `contacts`, `caps`, `punctuation`, `locale-date`, `date`, `custom-pattern`, `word-count`) used for the popup's "hidden by filter" breakdown.
 
 Note: Per-video disabled check happens before the pipeline in `processThread()`.
 
@@ -204,3 +214,8 @@ Popup opens as a full-screen overlay. CSS uses `@media (max-width: 480px)` break
 | Keyword Whitelist | `whitelistEnabled` + `whitelist` | Overrides all other filters — matching comments always stay visible |
 | Emoji-Only | `emojiOnlyEnabled` | Hides comments containing ONLY emoji characters |
 | Custom Patterns | `customPatternsEnabled` + `customPatterns` | User-defined regex patterns (10 presets + custom) |
+| Spam: Links | `spamFilters.linksEnabled` + `linksAllowedDomains` | Hides comments containing a URL, with a domain allow-list |
+| Spam: Contacts | `spamFilters.contactsEnabled` | Hides comments with email, phone, or Telegram/WhatsApp details |
+| Spam: All-Caps | `spamFilters.capsEnabled` + `capsMinLength` | Hides comments written entirely in capital letters |
+| Spam: Punctuation | `spamFilters.punctuationEnabled` | Hides `!!!`, `???`, repeated characters, doubled words, spaced-out text |
+| Spam: Extra Locales | `spamFilters.localesEnabled` | Hides date mentions in ES / FR / DE / PT / RU |
